@@ -12,6 +12,7 @@
 
 class laptop {
 public:
+#if 1
     laptop (std::string model_ = "unknown") :
         model(model_),
         price(msl::rand<double>(1.0, 1000.99)[0]),
@@ -20,6 +21,18 @@ public:
         ram(msl::rand<int>(1,100)[0]),
         id(id_generator())
     {}
+#endif
+
+#if 0
+    laptop (std::string model_ = "unknown") :
+        model(model_),
+        price(msl::random<double>(1.0, 1000.99)),
+        diagonal(msl::random<double>(1.0, 20.11)),
+        coresNum(msl::random<int>(1,100)),
+        ram(msl::random<int>(1,100)),
+        id(id_generator())
+    {}
+#endif
 
 private:
     static int id_generator() {
