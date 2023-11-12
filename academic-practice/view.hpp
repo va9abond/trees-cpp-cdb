@@ -48,6 +48,7 @@ inline void task2_1_1_presentation (int count) {
     printf("\n##############################\n");
     std::cout.width(30); cout << right << "@ task 2.1.1" << "\n";
 
+
     msl::print(create_laptop_map(count, true));
     std::cout << std::endl;
 }
@@ -85,6 +86,7 @@ inline void task2_1_2_presentation (const alias::laptop_map& map) {
     using std::right;
     printf("\n##############################\n");
     std::cout.width(30); cout << right << "@ task 2.1.2" << "\n";
+
 
     auto iter1 = find_by_key(map, laptop_key("Factory 5", "Model 5"));
     if (iter1 != map.end()) {
@@ -162,6 +164,7 @@ inline void task2_1_5_presentation (alias::laptop_map& map) {
     printf("\n##############################\n");
     std::cout.width(30); cout << right << "@ task 2.1.5" << "\n";
 
+
     // insert(map, {"Factory 5", "Model 5"}, laptop());
     insert(map, {"Factory 287", "Model 287"}, laptop());
 }
@@ -185,14 +188,35 @@ inline void task2_1_6_presentation (const alias::laptop_map& map) {
     printf("\n##############################\n");
     std::cout.width(30); cout << right << "@ task 2.1.6" << "\n";
 
+
     msl::print(unique_values(map));
 }
-
-
 // =============================================================================
-// ================================ 2_1_3 ======================================
+// ================================ 2_2_1 ======================================
 // =============================================================================
+inline void task2_2_1_presentation () {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.2.1" << "\n";
 
+
+    // create laptop map
+    //               ---
+    alias::laptop_map map = create_laptop_map(10, false);
+
+    // move map [key, value] into multimap
+    alias::laptop_multimap multimap(map.begin(), map.end());
+
+    // add some existing keys
+    multimap.emplace(laptop_key("Factory 1", "Model 1"), laptop());
+    multimap.emplace(laptop_key("Factory 1", "Model 1"), laptop());
+    // and some more
+    multimap.emplace(laptop_key("Factory 2", "Model 2"), laptop());
+    multimap.emplace(laptop_key("Factory 2", "Model 2"), laptop());
+
+    msl::print(multimap);
+}
 
 
 
