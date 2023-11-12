@@ -43,6 +43,11 @@ inline decltype(auto) create_laptop_map (int count, bool log_status = false) {
 
 
 inline void task2_1_1_presentation (int count) {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.1.1" << "\n";
+
     msl::print(create_laptop_map(count, true));
     std::cout << std::endl;
 }
@@ -76,6 +81,11 @@ inline Iter_t find_by_value (const alias::laptop_map& map, const laptop& value) 
 
 
 inline void task2_1_2_presentation (const alias::laptop_map& map) {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.1.2" << "\n";
+
     auto iter1 = find_by_key(map, laptop_key("Factory 5", "Model 5"));
     if (iter1 != map.end()) {
         msl::print(iter1);
@@ -108,6 +118,9 @@ inline alias::laptop_map filter (const alias::laptop_map& map, Pred_t pred) {
 inline void task2_1_4_presentation (const alias::laptop_map& map) {
     using std::cout;
     using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.1.4" << "\n";
+
 
     std::function<bool(const laptop&)> pred = [](const laptop& lap) {
         return lap.id > 5;
@@ -137,19 +150,43 @@ inline Iter_t insert (
         throw std::runtime_error("The element with the passed key already exists");
     }
     std::cout << "Insertion succeeded\n";
+    msl::print(iter);
+
     return iter;
 }
 
 
 inline void task2_1_5_presentation (alias::laptop_map& map) {
-    insert(map, {"Factory 5", "Model 5"}, laptop());
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.1.5" << "\n";
+
+    // insert(map, {"Factory 5", "Model 5"}, laptop());
+    insert(map, {"Factory 287", "Model 287"}, laptop());
 }
 // =============================================================================
 // ================================ 2_1_6 ======================================
 // =============================================================================
+inline std::vector<laptop> unique_values (const alias::laptop_map& map) {
+    std::set<laptop> set;
+
+    for (const auto& [key, value] : map) {
+        set.emplace(value);
+    }
+
+    return std::vector<laptop>(set.begin(), set.end());
+}
 
 
+inline void task2_1_6_presentation (const alias::laptop_map& map) {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.1.6" << "\n";
 
+    msl::print(unique_values(map));
+}
 
 
 // =============================================================================

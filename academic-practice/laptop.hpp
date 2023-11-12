@@ -172,6 +172,19 @@ namespace msl {
         }
 #endif
     }
+
+
+    void print (const std::vector<laptop>& laptops) {
+        using std::cout;
+        using std::right;
+        using std::left;
+
+        std::cout << "{";
+        for (const auto& lap : laptops) {
+            std::cout << " " << lap.id;
+        }
+        std::cout << " }\n";
+    }
 }
 
 
