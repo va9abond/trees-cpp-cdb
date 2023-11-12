@@ -27,6 +27,9 @@ public:
     {}
 #endif
 
+    // laptop (laptop&&) = default;
+    // laptop& operator= (laptop&&) = default;
+
 private:
     static int id_generator() { // mb I should remove static here, it's about design
         static int id = 0;
@@ -35,10 +38,10 @@ private:
 
 public:
             double      price;
-    const   double      diagonal;
+    mutable double      diagonal;
     mutable int         coresNum;
     mutable int         ram;
-    const   int         id;
+    mutable int         id;
 };
 
 bool operator== (const laptop& Lhs, const laptop& Rhs) {
@@ -84,6 +87,18 @@ bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
 #endif
 
 
+inline std::vector<laptop> create_laptop_vector (int count) {
+    std::vector<laptop> laptops(count);
+    return laptops;
+}
+
+
+inline std::priority_queue<laptop> create_laptop_prq (int count) {
+    std::vector<laptop> laptops(count);
+    return std::priority_queue(laptops.begin(), laptops.end());
+}
+
+
 namespace alias {
     using laptop_map = std::map<laptop_key, laptop>;
     using laptop_multimap = std::multimap<laptop_key, laptop>;
@@ -94,7 +109,7 @@ namespace alias {
 }
 
 namespace msl {
-    void print (const laptop& lap) {
+    inline void print (const laptop& lap) {
         using std::cout;
         using std::right;
         using std::left;
@@ -110,7 +125,7 @@ namespace msl {
     }
 
 
-    void print (const laptop_key& key) {
+    inline void print (const laptop_key& key) {
         using std::cout;
         using std::right;
         using std::left;
@@ -125,7 +140,7 @@ namespace msl {
     template <
         class Iter_t = alias::laptop_map::const_iterator
     >
-    void print (Iter_t iter) {
+    inline void print (Iter_t iter) {
         using std::cout;
         using std::right;
         using std::left;
@@ -150,7 +165,7 @@ namespace msl {
     }
 
 
-    void print (const alias::laptop_map& map) {
+    inline void print (const alias::laptop_map& map) {
         using std::cout;
         using std::right;
         using std::left;
@@ -177,7 +192,7 @@ namespace msl {
     }
 
 
-    void print (const alias::laptop_multimap& multimap) {
+    inline void print (const alias::laptop_multimap& multimap) {
         using std::cout;
         using std::right;
         using std::left;
@@ -204,7 +219,7 @@ namespace msl {
     }
 
 
-    void print (const std::vector<laptop>& laptops) {
+    inline void print (const std::vector<laptop>& laptops) {
         using std::cout;
         using std::right;
         using std::left;
@@ -214,6 +229,23 @@ namespace msl {
             std::cout << " " << lap.id;
         }
         std::cout << " }\n";
+    }
+
+
+    // [NOTE]: There is a nice way to print queue,
+    //         see "Example":
+    //         https://en.cppreference.com/w/cpp/container/priority_queue
+    inline void print (std::priority_queue<laptop> prq) {
+        using std::cout;
+        using std::right;
+        using std::left;
+
+        std::cout << "{";
+        while (!prq.empty()) {
+            std::cout << " " << prq.top().id;
+            prq.pop();
+        }
+        std::cout << "}\n";
     }
 }
 
