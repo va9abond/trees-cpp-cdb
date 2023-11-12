@@ -10,7 +10,7 @@
 #include <random>
 #include <format>
 #include <algorithm>
-
+#include <functional>
 
 namespace alias {
     template <class T> using v = std::vector<T>;
@@ -63,22 +63,6 @@ namespace msl {
         }
 
         return rands;
-    }
-
-
-    template <
-        template <class... > class container_type,
-        class value_type
-    >
-    void print (const container_type<value_type>& cont) {
-        printf("\n{ ");
-
-        auto it = cont.begin();
-        while (it != cont.end()) {
-            std::cout << *(it++) << " ";
-        }
-
-        printf("};\n");
     }
 }
 
