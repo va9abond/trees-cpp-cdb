@@ -94,7 +94,7 @@ namespace alias {
 }
 
 namespace msl {
-    void print (const laptop& lap) {
+    inline void print (const laptop& lap) {
         using std::cout;
         using std::right;
         using std::left;
@@ -110,7 +110,7 @@ namespace msl {
     }
 
 
-    void print (const laptop_key& key) {
+    inline void print (const laptop_key& key) {
         using std::cout;
         using std::right;
         using std::left;
@@ -125,7 +125,7 @@ namespace msl {
     template <
         class Iter_t = alias::laptop_map::const_iterator
     >
-    void print (Iter_t iter) {
+    inline void print (Iter_t iter) {
         using std::cout;
         using std::right;
         using std::left;
@@ -150,7 +150,7 @@ namespace msl {
     }
 
 
-    void print (const alias::laptop_map& map) {
+    inline void print (const alias::laptop_map& map) {
         using std::cout;
         using std::right;
         using std::left;
@@ -177,7 +177,7 @@ namespace msl {
     }
 
 
-    void print (const alias::laptop_multimap& multimap) {
+    inline void print (const alias::laptop_multimap& multimap) {
         using std::cout;
         using std::right;
         using std::left;
@@ -204,7 +204,7 @@ namespace msl {
     }
 
 
-    void print (const std::vector<laptop>& laptops) {
+    inline void print (const std::vector<laptop>& laptops) {
         using std::cout;
         using std::right;
         using std::left;
