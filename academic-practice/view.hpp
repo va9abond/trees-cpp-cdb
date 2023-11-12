@@ -310,7 +310,7 @@ inline void task2_2_4_presentation (const alias::laptop_multimap& mmap) {
     using std::cout;
     using std::right;
     printf("\n##############################\n");
-    std::cout.width(30); cout << right << "@ task 2.1.4" << "\n";
+    std::cout.width(30); cout << right << "@ task 2.2.4" << "\n";
 
     std::function<bool(const laptop&)> pred = [](const laptop& lap) {
         return lap.id % 13 < 5;
@@ -323,12 +323,39 @@ inline void task2_2_4_presentation (const alias::laptop_multimap& mmap) {
     cout.width(30); cout << right << "FILTER END" << "\n";
     printf("==============================\n");
 }
+// =============================================================================
+// ================================ 2_2_7 ======================================
+// =============================================================================
+template <
+    class Iter_t = alias::lmm_const_iter
+>
+inline std::vector<laptop> filter_by_key (
+        Iter_t First, Iter_t Last,
+        const laptop_key& key
+    ) {
+    std::vector<laptop> laptops;
+    for (auto iter = First; iter != Last; ++iter) {
+        if (!(iter->first < key) && !(key < iter->first)) {
+            laptops.push_back(iter->second);
+        }
+    }
+    return laptops;
+}
 
 
-// =============================================================================
-// ================================ 2_1_3 ======================================
-// =============================================================================
-//
+inline void task2_2_7_presentation (
+    const alias::laptop_multimap& mmap,
+    const laptop_key& key
+    ) {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.2.4" << "\n";
+
+
+    std::vector<laptop> laptops = filter_by_key(mmap.begin(), mmap.end(), key);
+    msl::print(laptops);
+}
 
 // =============================================================================
 // ================================ 2_1_3 ======================================
