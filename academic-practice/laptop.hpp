@@ -86,8 +86,11 @@ bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
 
 namespace alias {
     using laptop_map = std::map<laptop_key, laptop>;
+    using laptop_multimap = std::multimap<laptop_key, laptop>;
     using lm_const_iter = std::map<laptop_key, laptop>::const_iterator;
     using lm_iter = std::map<laptop_key, laptop>::iterator;
+    using lmm_const_iter = std::multimap<laptop_key, laptop>::const_iterator;
+    using lmm_iter = std::multimap<laptop_key, laptop>::iterator;
 }
 
 namespace msl {
@@ -166,6 +169,33 @@ namespace msl {
                                               // C++17 Style
 #if 0
         for (const auto& [key, value] : map) {
+            cout << "Model: "; cout.width(8); cout << left << key.model
+                 << " | ";
+            cout << "id: "; cout.width(2); cout << value.id << "\n";
+        }
+#endif
+    }
+
+
+    void print (const alias::laptop_multimap& multimap) {
+        using std::cout;
+        using std::right;
+        using std::left;
+                                              // C++98 Style
+#if 0
+        for (
+            alias::lmm_const_iter iter = multimap.begin();
+            iter != map.end();
+            ++iter
+        ) {
+            cout << "Model: "; cout.width(8); cout << left << iter->first.model
+                 << " | ";
+            cout << "id: "; cout.width(2); cout << iter->second.id << "\n";
+        }
+#endif
+                                              // C++17 Style
+#if 1
+        for (const auto& [key, value] : multimap) {
             cout << "Model: "; cout.width(8); cout << left << key.model
                  << " | ";
             cout << "id: "; cout.width(2); cout << value.id << "\n";
