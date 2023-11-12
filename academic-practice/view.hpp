@@ -120,28 +120,32 @@ inline void task2_1_4_presentation (const alias::laptop_map& map) {
     cout.width(30); cout << right << "FILTER END" << "\n";
     printf("==============================\n");
 }
-
-
-
-
-
-
-
-
-
-
-
 // =============================================================================
 // ================================ 2_1_5 ======================================
 // =============================================================================
+template <
+    class Iter_t = alias::lm_const_iter
+>
+inline Iter_t insert (
+        alias::laptop_map& map,
+        const laptop_key& key,
+        const laptop& value
+    ) {
+
+    const auto& [iter, success] = map.insert({key, value});
+    if (!success) {
+        throw std::runtime_error("The element with the passed key already exists");
+    }
+    std::cout << "Insertion succeeded\n";
+    return iter;
+}
 
 
-
-
-
-
+inline void task2_1_5_presentation (alias::laptop_map& map) {
+    insert(map, {"Factory 5", "Model 5"}, laptop());
+}
 // =============================================================================
-// ================================ 2_1_3 ======================================
+// ================================ 2_1_6 ======================================
 // =============================================================================
 
 
