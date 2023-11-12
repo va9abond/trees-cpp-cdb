@@ -1,14 +1,21 @@
 #ifndef MYUTILS_CPP
 #define MYUTILS_CPP
 
+
 #include <iostream>
-#include <random>
+#include <map>
 #include <vector>
-#include <stdint.h>
+#include <utility>
+#include <string>
+#include <random>
+#include <format>
+#include <algorithm>
+
 
 namespace alias {
     template <class T> using v = std::vector<T>;
 }
+
 
 namespace msl {
 
@@ -58,6 +65,7 @@ namespace msl {
         return rands;
     }
 
+
     template <
         template <class... > class container_type,
         class value_type
@@ -73,6 +81,9 @@ namespace msl {
         printf("};\n");
     }
 }
+
+
+
 
 
 

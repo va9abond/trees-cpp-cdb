@@ -2,11 +2,6 @@
 #define LAPTOP_HPP
 
 
-#include <cstdlib>
-#include <iostream>
-#include <format>
-#include <string>
-#include <random>
 #include "myutils.hpp"
 
 
@@ -76,15 +71,12 @@ bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
 
 
 namespace msl {
-    inline void print (const laptop& lap) {
+    void print (const laptop& lap) {
         using std::cout;
         using std::right;
         using std::left;
 
         printf("\n==============================\n");
-        // cout.width(10); cout << left << "Factory: "; cout << lap.factory << "\n";
-        // cout.width(10); cout << left << "Model: "; cout << lap.model;
-
         cout.width(30); cout << right << std::format("(id: {})", lap.id) << "\n";
 
         cout.width(10); cout << left << "Price: ";    cout << lap.price    << "\n";
@@ -92,6 +84,33 @@ namespace msl {
         cout.width(10); cout << left << "Cores: ";    cout << lap.coresNum << "\n";
         cout.width(10); cout << left << "Ram: ";      cout << lap.ram      << "\n";
         printf("==============================\n");
+    }
+
+
+    void print (const std::map<laptop_key, laptop>& map) {
+        using std::cout;
+        using std::right;
+        using std::left;
+                                              // C++98 Style
+#if 1
+        for (
+            std::map<laptop_key, laptop>::const_iterator iter = map.begin();
+            iter != map.end();
+            ++iter
+        ) {
+            cout << "Model: "; cout.width(8); cout << left << iter->first.model
+                 << " | ";
+            cout << "id: "; cout.width(2); cout << iter->second.id << "\n";
+        }
+#endif
+                                              // C++17 Style
+#if 0
+        for (const auto& [key, value] : map) {
+            cout << "Model: "; cout.width(8); cout << left << key.model
+                 << " | ";
+            cout << "id: "; cout.width(2); cout << value.id << "\n";
+        }
+#endif
     }
 }
 
