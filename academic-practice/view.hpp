@@ -6,7 +6,6 @@
 #include "myutils.hpp"
 
 
-
 // =============================================================================
 // ================================ 2_1_1 ======================================
 // =============================================================================
@@ -19,35 +18,81 @@ inline void print_insertion_status (Iter_t iter, bool status) {
 }
 
 
-inline decltype(auto) create_laptop_map (int count) {
+inline decltype(auto) create_laptop_map (int count, bool log_status = false) {
     std::vector<laptop_key> keys;
     std::vector<laptop>     laptops;
 
     std::map<laptop_key, laptop> laptop_map;
 
     for (int i = 1; i <= count; ++i) {
+        laptop lap;
         laptop_key key (
                 std::string("Factory " + std::to_string(i)),
                 std::string("Model " + std::to_string(i))
         );
-        laptop lap;
 
         keys.push_back(key); laptops.push_back(lap);
 
         const auto [iter, status] = laptop_map.insert({key,lap});
-        print_insertion_status(iter, status);
+        if (log_status) {
+            print_insertion_status(iter, status);
+        }
     }
     return laptop_map;
 }
 
 
 inline void task2_1_1_presentation (int count) {
-    msl::print(create_laptop_map(count));
+    msl::print(create_laptop_map(count, true));
+    std::cout << std::endl;
 }
 // =============================================================================
 // ================================ 2_1_2 ======================================
 // =============================================================================
+// [WARNING]: It's not safe, cause I can't check is returned iterator is valid
+//            (safe dereferencing) where I don't have an access to map
+template <
+    class Iter_t = alias::lm_const_iter
+>
+inline Iter_t find_by_key (const alias::laptop_map& map, const laptop_key& key) {
+    Iter_t iter = map.find(key);
+    return iter;
+}
 
+
+// [WARNING]: It's not safe, cause I can't check is returned iterator is valid
+//            (safe dereferencing) where I don't have an access to map
+template <
+    class Iter_t = alias::lm_const_iter
+>
+inline Iter_t find_by_value (const alias::laptop_map& map, const laptop& value) {
+    for (auto iter = map.begin(); iter != map.end(); ++iter) {
+        if (iter->second == value) {
+            return iter;
+        }
+    }
+    return map.end();
+}
+
+
+inline void task2_1_2_presentation (const alias::laptop_map& map) {
+    auto iter1 = find_by_key(map, laptop_key("Factory 5", "Model 5"));
+    if (iter1 != map.end()) {
+        msl::print(iter1);
+    } else {
+        std::cout << "Iterator is not valid\n";
+    }
+
+    auto iter2 = find_by_value(map, map.begin()->second);
+    if (iter2 != map.end()) {
+        msl::print(iter2);
+    } else {
+        std::cout << "Iterato is not valid\n";
+    }
+}
+// =============================================================================
+// ================================ 2_1_3 ======================================
+// =============================================================================
 
 
 
