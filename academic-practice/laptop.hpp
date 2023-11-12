@@ -68,6 +68,11 @@ struct laptop_key {
     const std::string model;
 };
 
+#if 0
+bool operator== (const laptop_key& Rhs, const laptop_key Lhs) {
+    return (Lhs.factory == Rhs.factory && Lhs.model == Rhs.model);
+}
+#endif
 
 #if 0
 bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
@@ -96,6 +101,18 @@ namespace msl {
         cout.width(10); cout << left << "Diagonal: "; cout << lap.diagonal << "\n";
         cout.width(10); cout << left << "Cores: ";    cout << lap.coresNum << "\n";
         cout.width(10); cout << left << "Ram: ";      cout << lap.ram      << "\n";
+        printf("==============================\n");
+    }
+
+
+    void print (const laptop_key& key) {
+        using std::cout;
+        using std::right;
+        using std::left;
+
+        printf("\n==============================\n");
+        cout.width(9); cout << left << "Factory: "; cout << key.factory << "\n";
+        cout.width(9); cout << left << "Model: ";   cout << key.model   << "\n";
         printf("==============================\n");
     }
 
