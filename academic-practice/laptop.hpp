@@ -27,6 +27,9 @@ public:
     {}
 #endif
 
+    // laptop (laptop&&) = default;
+    // laptop& operator= (laptop&&) = default;
+
 private:
     static int id_generator() { // mb I should remove static here, it's about design
         static int id = 0;
@@ -35,10 +38,10 @@ private:
 
 public:
             double      price;
-    const   double      diagonal;
+    mutable double      diagonal;
     mutable int         coresNum;
     mutable int         ram;
-    const   int         id;
+    mutable int         id;
 };
 
 bool operator== (const laptop& Lhs, const laptop& Rhs) {
@@ -82,6 +85,18 @@ bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
     return Lhs.model < Rhs.model;
 }
 #endif
+
+
+inline std::vector<laptop> create_laptop_vector (int count) {
+    std::vector<laptop> laptops(count);
+    return laptops;
+}
+
+
+inline std::priority_queue<laptop> create_laptop_prq (int count) {
+    std::vector<laptop> laptops(count);
+    return std::priority_queue(laptops.begin(), laptops.end());
+}
 
 
 namespace alias {
@@ -214,6 +229,23 @@ namespace msl {
             std::cout << " " << lap.id;
         }
         std::cout << " }\n";
+    }
+
+
+    // [NOTE]: There is a nice way to print queue,
+    //         see "Example":
+    //         https://en.cppreference.com/w/cpp/container/priority_queue
+    inline void print (std::priority_queue<laptop> prq) {
+        using std::cout;
+        using std::right;
+        using std::left;
+
+        std::cout << "{";
+        while (!prq.empty()) {
+            std::cout << " " << prq.top().id;
+            prq.pop();
+        }
+        std::cout << "}\n";
     }
 }
 
