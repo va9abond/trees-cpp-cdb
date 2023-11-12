@@ -41,6 +41,15 @@ public:
     const   int         id;
 };
 
+bool operator== (const laptop& Lhs, const laptop& Rhs) {
+    return Lhs.id == Rhs.id;
+}
+
+
+bool operator< (const laptop& Lhs, const laptop& Rhs) {
+    return Lhs.id < Rhs.id;
+}
+
 
 struct laptop_key {
     laptop_key (std::string_view factory_ = "unknown", std::string_view model_ = "unknown") :
@@ -117,5 +126,6 @@ namespace msl {
 #endif
     }
 }
+
 
 #endif // LAPTOP_HPP
