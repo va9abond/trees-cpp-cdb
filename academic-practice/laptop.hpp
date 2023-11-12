@@ -70,6 +70,10 @@ bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
 #endif
 
 
+namespace alias {
+    using laptop_map = std::map<laptop_key, laptop>;
+}
+
 namespace msl {
     void print (const laptop& lap) {
         using std::cout;
@@ -87,14 +91,14 @@ namespace msl {
     }
 
 
-    void print (const std::map<laptop_key, laptop>& map) {
+    void print (const alias::laptop_map& map) {
         using std::cout;
         using std::right;
         using std::left;
                                               // C++98 Style
 #if 1
         for (
-            std::map<laptop_key, laptop>::const_iterator iter = map.begin();
+            alias::laptop_map::const_iterator iter = map.begin();
             iter != map.end();
             ++iter
         ) {
