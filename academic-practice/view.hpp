@@ -217,14 +217,76 @@ inline void task2_2_1_presentation () {
 
     msl::print(multimap);
 }
-
-
-
 // =============================================================================
-// ================================ 2_1_3 ======================================
+// ================================ 2_2_2 ======================================
 // =============================================================================
+template <
+    class Iter_t = alias::lmm_const_iter
+>
+// [WARNING]: There are no guarantees that First and Last belog to the same
+//            container
+inline std::vector<Iter_t> find_by_key (
+        Iter_t First, Iter_t Last,
+        const laptop_key& key
+    ) {
+    std::vector<Iter_t> iters;
+    for (auto iter = First; iter != Last; ++iter) {
+        if (!(iter->first < key) && !(key < iter->first)) {
+            iters.push_back(iter);
+        }
+    }
+    return iters;
+}
 
 
+template <
+    class Iter_t = alias::lmm_const_iter
+>
+// [WARNING]: There are no guarantees that First and Last belog to the same
+//            container
+inline std::vector<Iter_t> find_by_value (
+        Iter_t First, Iter_t Last,
+        const laptop& value
+        ) {
+    std::vector<Iter_t> iters;
+    for (auto iter = First; iter != Last; ++iter) {
+        if (iter->second == value) {
+            iters.push_back(iter);
+        }
+    }
+    return iters;
+}
+
+
+inline void task2_2_2_presentation (const alias::laptop_multimap& mmap) {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.2.2" << "\n";
+
+
+    auto iters1 = find_by_key(mmap.begin(), mmap.end(), laptop_key("Factory 1", "Model 1"));
+    if (iters1.size() > 0) {
+        std::cout << "{";
+        for (const auto& iter : iters1) {
+            std::cout << " " << iter->second.id;
+        }
+        std::cout << " }\n";
+    } else {
+        std::cout << "There is no value with passed key\n";
+    }
+
+    auto iters2 = find_by_value(mmap.begin(), mmap.end(), mmap.begin()->second);
+    if (iters2.size() > 0) {
+        std::cout << "{";
+        for (const auto& iter : iters2) {
+            std::cout << " " << iter->second.id;
+        }
+        std::cout << " }\n";
+    } else {
+        std::cout << "There is no passed value";
+    }
+}
 
 // =============================================================================
 // ================================ 2_1_3 ======================================
