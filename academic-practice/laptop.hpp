@@ -47,6 +47,34 @@ public:
 };
 
 
+struct laptop_key {
+    laptop_key (std::string_view factory_ = "unknown", std::string_view model_ = "unknown") :
+        factory(factory_),
+        model(model_)
+    {}
+
+    bool operator< (const laptop_key& Rhs) const noexcept {
+        if (factory != Rhs.factory) {
+            return factory < Rhs.factory;
+        } else if (model != Rhs.model) {}
+        return model < Rhs.model;
+    }
+
+    const std::string factory;
+    const std::string model;
+};
+
+
+#if 0
+bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
+    if (Lhs.factory != Rhs.factory) {
+        return Lhs.factory < Rhs.factory;
+    }
+    return Lhs.model < Rhs.model;
+}
+#endif
+
+
 namespace msl {
     inline void print (const laptop& lap) {
         using std::cout;
