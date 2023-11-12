@@ -86,6 +86,8 @@ bool operator< (const laptop_key& Lhs, const laptop_key& Rhs) {
 
 namespace alias {
     using laptop_map = std::map<laptop_key, laptop>;
+    using lm_const_iter = std::map<laptop_key, laptop>::const_iterator;
+    using lm_iter = std::map<laptop_key, laptop>::iterator;
 }
 
 namespace msl {
@@ -113,6 +115,34 @@ namespace msl {
         printf("\n==============================\n");
         cout.width(9); cout << left << "Factory: "; cout << key.factory << "\n";
         cout.width(9); cout << left << "Model: ";   cout << key.model   << "\n";
+        printf("==============================\n");
+    }
+
+
+    template <
+        class Iter_t = alias::laptop_map::const_iterator
+    >
+    void print (Iter_t iter) {
+        using std::cout;
+        using std::right;
+        using std::left;
+        // const laptop_key& key = iter->first;
+        // const laptop& value = iter->second;
+        const auto& [key, value] = *iter;
+
+        printf("\n==============================\n");
+                                            // print key
+        cout.width(30); cout << right << "KEY" << "\n";
+        cout.width(9);  cout << left << "Factory: "; cout << key.factory << "\n";
+        cout.width(9);  cout << left << "Model: ";   cout << key.model   << "\n";
+
+                                          // print value
+        cout.width(30); cout << right << "VALUE" << "\n";
+        cout.width(30); cout << right << std::format("(id: {})", value.id) << "\n";
+        cout.width(10); cout << left << "Price: ";    cout << value.price    << "\n";
+        cout.width(10); cout << left << "Diagonal: "; cout << value.diagonal << "\n";
+        cout.width(10); cout << left << "Cores: ";    cout << value.coresNum << "\n";
+        cout.width(10); cout << left << "Ram: ";      cout << value.ram      << "\n";
         printf("==============================\n");
     }
 
