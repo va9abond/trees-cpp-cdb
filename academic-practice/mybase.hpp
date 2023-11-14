@@ -4,6 +4,7 @@
 
 #include <iostream>
 
+#define SWITCH_SWAP_PROXY_AND_ITERATORS 0
 
 namespace msl {
     inline void _MSL_REPORT_ERROR_f (const char* mesg) noexcept {
@@ -42,12 +43,11 @@ struct Container_base {
     }
 
     void Orphan_all() noexcept;
+#if SWITCH_SWAP_PROXY_AND_ITERATORS
     void Swap_proxy_and_iterators (Container_base&) noexcept;
-
+#endif
     void Alloc_proxy() {
         Myproxy = new Container_proxy(this);
-        // Myproxy = static_cast<Container_proxy*>(::operator new(sizeof(Container_proxy)));
-        // Myproxy->_Mycont = this;
     }
 
     void Free_proxy() noexcept {
@@ -79,7 +79,7 @@ public:
         Orphan_me_v2();
     }
 
-    void _Adopt_by_cont(const Container_base* Parent) noexcept {
+    void _Adopt_by_cont (const Container_base* Parent) noexcept {
         return Adopt_me(Parent);
     }
 
@@ -180,6 +180,7 @@ inline void Container_base::Orphan_all() noexcept {
     // Secondly, does we still can to get access to data throught these iterators?
 }
 
+#if SWITCH_SWAP_PROXY_AND_ITERATORS
 // swap owners of proxy and iterators
 inline void Container_base::Swap_proxy_and_iterators (Container_base& Rhs) noexcept {
     // swap proxy
@@ -191,6 +192,7 @@ inline void Container_base::Swap_proxy_and_iterators (Container_base& Rhs) noexc
     if (Myproxy) { Myproxy->Mycont = this; }
     if (Rhs.Myproxy) { Rhs.Myproxy->Mycont = &Rhs; }
 }
+#endif
 
 
 #endif // MYBASE_HPP
