@@ -5,7 +5,7 @@
 #include "myutils.hpp"
 
 
-enum class traveling_order_tag {
+enum class traversal_order_tag {
     in_order,
     pre_order,
     post_order
@@ -14,7 +14,7 @@ enum class traveling_order_tag {
 
 template <
     class Mytree,
-    traveling_order_tag Trot = traveling_order_tag::in_order
+    traversal_order_tag Trot = traversal_order_tag::in_order
 >
 class Tree_const_iterator { // Tree_const_unchecked_iterator
 public:
@@ -43,7 +43,7 @@ public:
 
     Tree_const_iterator& operator++() noexcept {
         switch (Trot) {
-            case traveling_order_tag::in_order:
+            case traversal_order_tag::in_order:
                 if ( Myptr->Right == nullptr ) {
                     Nodeptr Pnode = Myptr;
                     while ( (Pnode = Myptr->Parent) && Myptr == Pnode->Right ) {
@@ -55,10 +55,10 @@ public:
                 }
                 return &this;
                 break;
-            case traveling_order_tag::pre_order:
+            case traversal_order_tag::pre_order:
 
                 break;
-            case traveling_order_tag::post_order:
+            case traversal_order_tag::post_order:
 
                 break;
         }
@@ -73,7 +73,7 @@ public:
 
     Tree_const_iterator& operator--() noexcept {
         switch (Trot) {
-            case traveling_order_tag::in_order:
+            case traversal_order_tag::in_order:
                 if (Myptr->Ishead) { // --end() ==> rightmost
                     Myptr = Myptr->Right;
                 } else if (Myptr->Left == nullptr) {
@@ -89,10 +89,10 @@ public:
                 }
                 return *this;
                 break;
-            case traveling_order_tag::pre_order:
+            case traversal_order_tag::pre_order:
 
                 break;
-            case traveling_order_tag::post_order:
+            case traversal_order_tag::post_order:
 
                 break;
         }
@@ -119,7 +119,7 @@ public:
 
 template <
     class Mytree,
-    traveling_order_tag Trot = traveling_order_tag::in_order
+    traversal_order_tag Trot = traversal_order_tag::in_order
 > // Tree_unchecked_iterator
 class Tree_iterator : public Tree_const_iterator<Mytree, Trot> {
 public:
@@ -269,7 +269,7 @@ public:
     using Self = avltree<Kty, Ty, Compr_t>;
     // using iterator = Tree_iterator<Traits, traveling_order_tag::in_order>;
     using const_iterator = Tree_const_iterator <
-        Self, traveling_order_tag::in_order
+        Self, traversal_order_tag::in_order
     >;
 
 // [TODO]: Lrotate
