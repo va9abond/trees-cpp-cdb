@@ -300,6 +300,29 @@ public:
         return Pnode;
     }
 
+    template <traversal_order_tag Trot, class Pred_t>
+    void traversal (Nodeptr Where, Pred_t Pred) {
+        if (Where) {
+            switch (Trot) {
+                case traversal_order_tag::in_order:
+                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
+                    Pred(Where);
+                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
+                    break;
+                case traversal_order_tag::pre_order:
+                    Pred(Where);
+                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
+                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
+                    break;
+                case traversal_order_tag::post_order:
+                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
+                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
+                    Pred(Where);
+                    break;
+            }
+        }
+    }
+
 public:
     Nodeptr Myhead; // pointer to head node
     size_type Mysize; // number of elements
