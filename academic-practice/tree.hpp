@@ -236,7 +236,7 @@ struct Tree_traits {
         value_compare (key_compare Pred) : comp(Pred) {}
 
         bool operator() (const value_type& Rhs, const value_type& Lhs) const {
-            return comt(Rhs.first, Lhs.first);
+            return comp(Rhs.first, Lhs.first);
         }
 
         key_compare comp;
@@ -288,7 +288,7 @@ public:
     avltree() noexcept : Myhead(), Mysize(0) {}
 
     static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
-                                                  // in subtree at Pnode
+                                                   // in subtree at Pnode
         while (Pnode->Right != nullptr) {
             Pnode = Pnode->Right;
         }
@@ -297,7 +297,7 @@ public:
     }
 
     static Nodeptr Min_ (Nodeptr Pnode) noexcept { // return leftmost node
-                                                  // in subtree at Pnode
+                                                   // in subtree at Pnode
         while (Pnode->Left) {
             Pnode = Pnode->Left;
         }
@@ -328,6 +328,16 @@ public:
     bool empty() const noexcept {
         return Mysize == 0;
     }
+
+    key_compare key_comp() const {
+        return Compr_t{};
+    }
+
+    value_compare value_comp() const {
+        return value_compare(key_comp());
+    }
+
+
 
     template <traversal_order_tag Trot, class Pred_t>
     void traversal (Nodeptr Where, Pred_t Pred) {
