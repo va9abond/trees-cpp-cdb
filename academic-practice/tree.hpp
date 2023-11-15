@@ -267,18 +267,23 @@ public:
     using const_reference = typename Traits::const_reference;
 
     using Self = avltree<Kty, Ty, Compr_t>;
-    // using iterator = Tree_iterator<Traits, traveling_order_tag::in_order>;
+    using iterator = Tree_iterator <
+        Self, traversal_order_tag::in_order
+    >;
     using const_iterator = Tree_const_iterator <
         Self, traversal_order_tag::in_order
     >;
 
-// [TODO]: Lrotate
-// [TODO]: Rrotate
-// [TODO]: Emplace
-// [TODO]: Erase
+//          BST in general, but not an avl
 // [TODO]: Ctor
 // [TODO]: Dtor
-// [TODO]: pre_order, post_order
+// [TODO]: Emplace
+//          balancing, convert BST to an avltree
+// [TODO]: Lrotate
+// [TODO]: Rrotate
+//          sugar
+// [TODO]: Erase
+// [TODO]: (iterator case) pre_order, post_order
 
     avltree() noexcept : Myhead(), Mysize(0) {}
 
@@ -298,6 +303,30 @@ public:
         }
 
         return Pnode;
+    }
+
+    iterator begin() noexcept {
+        return iterator(Myhead->Left);
+    }
+
+    const_iterator begin() const noexcept {
+        return const_iterator(Myhead->Left);
+    }
+
+    iterator end() noexcept {
+        return iterator(Myhead);
+    }
+
+    const_iterator end() const noexcept {
+        return const_iterator(Myhead);
+    }
+
+    size_type size() const noexcept {
+        return Mysize;
+    }
+
+    bool empty() const noexcept {
+        return Mysize == 0;
     }
 
     template <traversal_order_tag Trot, class Pred_t>
