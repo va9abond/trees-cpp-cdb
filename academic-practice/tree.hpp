@@ -337,7 +337,10 @@ public:
         return value_compare(key_comp());
     }
 
-
+private:
+    bool Is_equivalent (const key_type& Rhs, const key_type& Lhs) {
+        return !key_compare{}(Rhs, Lhs) && !key_compare{}(Lhs, Rhs);
+    }
 
     template <traversal_order_tag Trot, class Pred_t>
     void traversal (Nodeptr Where, Pred_t Pred) {
