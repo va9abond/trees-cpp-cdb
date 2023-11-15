@@ -51,7 +51,7 @@ public:
                     }
                     Myptr = Pnode;
                 } else {
-                    Myptr = Mytree::Min(Myptr->Right);
+                    Myptr = Mytree::Min_(Myptr->Right);
                 }
                 return &this;
                 break;
@@ -85,7 +85,7 @@ public:
                         Myptr = Pnode;
                     }
                 } else {
-                    Myptr = Mytree::max(Myptr->Left);
+                    Myptr = Mytree::Max_(Myptr->Left);
                 }
                 return *this;
                 break;
@@ -268,14 +268,21 @@ public:
 
     using Self = avltree<Kty, Ty, Compr_t>;
     // using iterator = Tree_iterator<Traits, traveling_order_tag::in_order>;
-    using const_iterator = Tree_const_iterator<
+    using const_iterator = Tree_const_iterator <
         Self, traveling_order_tag::in_order
     >;
 
+// [TODO]: Lrotate
+// [TODO]: Rrotate
+// [TODO]: Emplace
+// [TODO]: Erase
+// [TODO]: Ctor
+// [TODO]: Dtor
+// [TODO]: pre_order, post_order
 
     avltree() noexcept : Myhead(), Mysize(0) {}
 
-    static Nodeptr max (Nodeptr Pnode) noexcept { // return rightmost node
+    static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
                                                   // in subtree at Pnode
         while (Pnode->Right != nullptr) {
             Pnode = Pnode->Right;
@@ -284,7 +291,7 @@ public:
         return Pnode;
     }
 
-    static Nodeptr min (Nodeptr Pnode) noexcept { // return leftmost node
+    static Nodeptr Min_ (Nodeptr Pnode) noexcept { // return leftmost node
                                                   // in subtree at Pnode
         while (Pnode->Left) {
             Pnode = Pnode->Left;
@@ -293,9 +300,7 @@ public:
         return Pnode;
     }
 
-
-
-
+public:
     Nodeptr Myhead; // pointer to head node
     size_type Mysize; // number of elements
 };
