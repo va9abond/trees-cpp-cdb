@@ -117,7 +117,53 @@ public:
 };
 
 
+template <
+    class Mytree,
+    traveling_order_tag Trot = traveling_order_tag::in_order
+> // Tree_unchecked_iterator
+class Tree_iterator : public Tree_const_iterator<Mytree, Trot> {
+public:
+    using Mybase = Tree_const_iterator<Mytree, Trot>;
+    using iterator_category = std::bidirectional_iterator_tag;
 
+    using Nodeptr         = typename Mytree::Nodeptr;
+    using value_type      = typename Mytree::value_type;
+    using difference_type = typename Mytree::difference_type;
+    using pointer         = typename Mytree::pointer;
+    using reference       = value_type&;
+
+    using Mybase::Mybase; // inherit base class constructors
+
+    reference operator*() const noexcept {
+        return const_cast<reference>(Mybase::operator*());
+    }
+
+    pointer operator->() const noexcept {
+        return const_cast<pointer>(Mybase::operator->());
+    }
+
+    Tree_iterator& operator++() noexcept {
+        Mybase::operator++();
+        return *this;
+    }
+
+    Tree_iterator& operator++(int) noexcept {
+        Tree_iterator Tmp = *this;
+        Mybase::operator++();
+        return Tmp;
+    }
+
+    Tree_iterator& operator--() noexcept {
+        Mybase::operator--();
+        return *this;
+    }
+
+    Tree_iterator& operator--(int) noexcept {
+        Tree_iterator Tmp = *this;
+        Mybase::operator--();
+        return Tmp;
+    }
+};
 
 
 template <class Value_type>
