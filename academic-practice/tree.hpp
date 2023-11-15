@@ -185,10 +185,10 @@ struct Tree_node {
     Tree_node& operator= (const Tree_node&) = delete;
 
     static Nodeptr Buy_head_node() {
-        Nodeptr Node = new Tree_node();
-        Node->Ishead = true;
-        Node->Left = Node; Node->Right = Node; Node->Parent = Node;
-        return Node;
+        Nodeptr Newptr = new Tree_node();
+        Newptr->Ishead = true;
+        Newptr->Left = Newptr; Newptr->Right = Newptr; Newptr->Parent = Newptr;
+        return Newptr;
     }
 
     template <class... Valty>
@@ -254,6 +254,7 @@ public:
     using Traits = Tree_traits<Kty, Ty, Compr_t>;
 
     using Nodeptr         = typename Traits::Nodeptr;
+    using Node            = typename Traits::Node;
     using key_type        = Kty;
     using mapped_type     = Ty;
     using key_compare     = Compr_t;
@@ -275,9 +276,9 @@ public:
     >;
 
 //          BST in general, but not an avl
-// [TODO]: Ctor
-// [TODO]: Dtor
-// [TODO]: Emplace
+// [TODO]: Ctor    [x]
+// [TODO]: Dtor    [x]
+// [TODO]: Emplace []
 //          balancing, convert BST to an avltree
 // [TODO]: Lrotate
 // [TODO]: Rrotate
@@ -285,8 +286,38 @@ public:
 // [TODO]: Erase
 // [TODO]: (iterator case) pre_order, post_order
 
-    avltree() noexcept : Myhead(), Mysize(0) {}
+    avltree() noexcept : Myhead(), Mysize(0) {
+        Myhead = Node::Buy_head_node();
+    }
 
+    ~avltree() noexcept {
+        Erase_head();
+    }
+
+private:
+    void Erase_head() noexcept {
+        Erase_tree(Myhead->Parent);
+        Free_node0(Myhead);
+    }
+
+    void Erase_tree (Nodeptr Rootnode) noexcept {
+        while (Rootnode) {
+        // while (!Rootnode->Ishead) {
+            Erase_tree(Rootnode->Right);
+            Node::Free_node(std::exchange(Rootnode, Rootnode->Left));
+        }
+    }
+
+public:
+    void clear() noexcept {
+        Erase_tree(Myhead->Parent);
+        Myhead->Parent = Myhead;
+        Myhead->Left = Myhead;
+        Myhead->Right = Myhead;
+        Mysize = 0;
+    }
+
+public:
     static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
                                                    // in subtree at Pnode
         while (Pnode->Right != nullptr) {
