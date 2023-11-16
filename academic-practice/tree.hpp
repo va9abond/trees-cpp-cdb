@@ -1,6 +1,8 @@
 #ifndef TREE_HPP
 #define TREE_HPP
 
+#define CHECK_TREE_SIZE 0
+#define RELEASE_FEATURE 0
 
 #include "myutils.hpp"
 
@@ -38,7 +40,7 @@ public:
     }
 
     pointer operator->() {
-        return std::addressof(Myptr->Myval);
+        return Myptr->Myval;
     }
 
     Tree_const_iterator& operator++() noexcept {
@@ -185,10 +187,10 @@ struct Tree_node {
     Tree_node& operator= (const Tree_node&) = delete;
 
     static Nodeptr Buy_head_node() {
-        Nodeptr Newptr = new Tree_node();
-        Newptr->Ishead = true;
-        Newptr->Left = Newptr; Newptr->Right = Newptr; Newptr->Parent = Newptr;
-        return Newptr;
+        Nodeptr Headptr = new Tree_node();
+        Headptr->Ishead = true;
+        Headptr->Left = Headptr; Headptr->Right = Headptr; Headptr->Parent = Headptr;
+        return Headptr;
     }
 
     template <class... Valty>
@@ -241,7 +243,28 @@ struct Tree_traits {
 
         key_compare comp;
     };
+
+    template <class Ty1, class Ty2>
+    static const key_type& Kfn (const std::pair<Ty1, Ty2>& Val) { // extract key from value
+        return Val.first;
+    }
 };
+
+
+#if RELEASE_FEATURE
+enum class Tree_child {
+    Right, // perf note: compare with _Right rather than _Left where possible for comparison with zero
+    Left,
+    Unused // indicates that tree child should never be used for insertion
+};
+
+template <class Nodeptr>
+struct Tree_find_result {
+    Nodeptr Parent; // the leaf node under which a new node should be inserted
+    Tree_child Child;
+    Nodeptr Bound;
+};
+#endif
 
 
 template <
@@ -263,7 +286,7 @@ public:
     using size_type       = typename Traits::size_type;
     using difference_type = typename Traits::difference_type;
     using pointer         = typename Traits::pointer;
-    using const_pointre   = typename Traits::const_pointer;
+    using const_pointer   = typename Traits::const_pointer;
     using reference       = typename Traits::reference;
     using const_reference = typename Traits::const_reference;
 
@@ -277,7 +300,7 @@ public:
 
 //          BST in general, but not an avl
 // [TODO]: Ctor    [x]
-// [TODO]: Dtor    [x]
+// [TODO]: Dtor    []
 // [TODO]: Emplace []
 //          balancing, convert BST to an avltree
 // [TODO]: Lrotate
@@ -297,7 +320,7 @@ public:
 private:
     void Erase_head() noexcept {
         Erase_tree(Myhead->Parent);
-        Free_node0(Myhead);
+        Node::Free_node0(Myhead);
     }
 
     void Erase_tree (Nodeptr Rootnode) noexcept {
@@ -368,11 +391,18 @@ public:
         return value_compare(key_comp());
     }
 
+#if CHECK_TREE_SIZE
+    size_type max_size() const noexcept {
+        return static_cast<size_type>(std::numeric_limits<difference_type>::max);
+    }
+#endif
+
 private:
     bool Is_equivalent (const key_type& Rhs, const key_type& Lhs) {
         return !key_compare{}(Rhs, Lhs) && !key_compare{}(Lhs, Rhs);
     }
 
+public:
     template <traversal_order_tag Trot, class Pred_t>
     void traversal (Nodeptr Where, Pred_t Pred) {
         if (Where) {
@@ -396,63 +426,78 @@ private:
         }
     }
 
+#if CHECK_TREE_SIZE
+private:
+    void Check_grow_by_1() {
+        if (max_size() == Mysize) {
+            throw std::length_error("tree too long");
+        }
+    }
+#endif
+
+#if RELEASE_FEATURE
+Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
+    Tree_find_result Loc { Myhead->Parent, Tree_child::Right };
+    Nodeptr Trynode = Loc.Parent;
+    key_compare Pred = key_comp();
+
+    while (Trynode) {
+        Loc.Parent = Trynode;
+        if (Pred(Traits::Kfn(Trynode->Myval), key)) {
+            Loc.Child = Tree_child::Right;
+            Trynode = Trynode->Right;
+        } else {
+            Loc.Child = Tree_child::Left;
+            // Result.Bound = Trynode;
+            Trynode = Trynode->Left;
+        }
+    }
+    return Loc;
+}
+
+template <class... Valtys>
+std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
+    Nodeptr Inserted = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
+    const key_type& key = Traits::Kfn(Inserted->Myval);
+    Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
+    // Check_grow_by_1();
+
+    return { Insert_node(Loc, Inserted), true };
+}
+
+Nodeptr Insert_node (const Tree_find_result<Nodeptr> Loc, const Nodeptr Newnode) noexcept {
+    ++Mysize;
+    Newnode->Parent = Loc.Parent;
+    if (Loc.Parent == Myhead) {    // <=> Mysize == 0,
+                                   // first node in tree, just set head values
+        Myhead->Left = Newnode;   // set min()
+        Myhead->Right = Newnode;  // set max()
+        Myhead->Parent = Newnode; // set root
+        return Newnode;
+    }
+
+    if (Loc.Child == Tree_child::Right) { // add to right of Loc.Parent
+        Loc.Parent->Right = Newnode;
+        if (Loc.Parent == Myhead->Right) { // if Newnode right of max(), then Newnode is new max()
+            Myhead->Right = Newnode;
+        }
+    } else {
+        Loc.Parent->Left = Newnode;
+        if (Loc.Parent == Myhead->Left) { // if Newnode left of min(), then Newnode is new min()
+            Myhead->Left = Newnode;
+        }
+    }
+
+    // [TODO]: Balance
+
+    return Newnode;
+}
+#endif
+
 public:
     Nodeptr Myhead; // pointer to head node
     size_type Mysize; // number of elements
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-template <
-    class Kty,                    // key type
-    class Mty,                    // mapped type
-    class Compr_t = std::less<Kty> // key comparator type
-> class map {
-public:
-    template <class U, class V> using pair = std::pair<U,V>;
-    // using Mybase  = ...
-    // using Nodeptr = ...
-    using key_type = Kty;
-    using mapped_type = Mty;
-    using key_compare = Compr_t;
-    using value_type = pair<const Kty, Mty>;
-    // using size_type = ...
-    // using difference_type = ...
-    // using pointer = ...
-    // using const_pointer = ...
-    using reference = value_type&;
-    using const_reference = const value_type&;
-    // using iterator = ...;
-    // using const_iterator = ...;
-    // using reverse_iteratoor = ...;
-    // using const_reverse_iterator = ...;
-
-
-
-    // mytree() : Mybase(key_compare()) {}
-};
-
-
-
-
-
-
-
-
 
 
 
