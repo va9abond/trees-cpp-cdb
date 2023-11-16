@@ -16,7 +16,7 @@ enum class traversal_order_tag {
 
 template <
     class Mytree,
-    traversal_order_tag Trot = traversal_order_tag::in_order
+    traversal_order_tag Order = traversal_order_tag::in_order
 >
 class Tree_const_iterator { // Tree_const_unchecked_iterator
 public:
@@ -44,7 +44,7 @@ public:
     }
 
     Tree_const_iterator& operator++() noexcept {
-        switch (Trot) {
+        switch (Order) {
             case traversal_order_tag::in_order:
                 if ( Myptr->Right->Ishead ) {
                     Nodeptr Pnode = nullptr;
@@ -57,11 +57,13 @@ public:
                 }
                 return *this;
                 break;
+
+
             case traversal_order_tag::pre_order:
-
                 break;
-            case traversal_order_tag::post_order:
 
+
+            case traversal_order_tag::post_order:
                 break;
         }
     }
@@ -74,7 +76,7 @@ public:
 
 
     Tree_const_iterator& operator--() noexcept {
-        switch (Trot) {
+        switch (Order) {
             case traversal_order_tag::in_order:
                 if (Myptr->Ishead) { // --end() ==> rightmost
                     Myptr = Myptr->Right;
@@ -93,11 +95,13 @@ public:
                 }
                 return *this;
                 break;
+
+
             case traversal_order_tag::pre_order:
-
                 break;
-            case traversal_order_tag::post_order:
 
+
+            case traversal_order_tag::post_order:
                 break;
         }
     }
@@ -123,11 +127,11 @@ public:
 
 template <
     class Mytree,
-    traversal_order_tag Trot = traversal_order_tag::in_order
+    traversal_order_tag Order = traversal_order_tag::in_order
 > // Tree_unchecked_iterator
-class Tree_iterator : public Tree_const_iterator<Mytree, Trot> {
+class Tree_iterator : public Tree_const_iterator<Mytree, Order> {
 public:
-    using Mybase = Tree_const_iterator<Mytree, Trot>;
+    using Mybase = Tree_const_iterator<Mytree, Order>;
     using iterator_category = std::bidirectional_iterator_tag;
 
     using Nodeptr         = typename Mytree::Nodeptr;
@@ -191,6 +195,7 @@ struct Tree_node {
     static Nodeptr Buy_head_node() {
         Nodeptr Headptr = new Tree_node();
         Headptr->Ishead = true;
+        Headptr->Height = 0;
         Headptr->Left = Headptr; Headptr->Right = Headptr; Headptr->Parent = Headptr;
         return Headptr;
     }
@@ -203,6 +208,7 @@ struct Tree_node {
         Newnode->Left = Myhead;
         Newnode->Right = Myhead;
         Newnode->Parent = Myhead;
+        Newnode->Height = 1;
         return Newnode;
     }
 
@@ -292,21 +298,35 @@ public:
     using reference       = typename Traits::reference;
     using const_reference = typename Traits::const_reference;
 
+    template <class, traversal_order_tag>
+    friend class Tree_iterator;
+
+    template <class, traversal_order_tag>
+    friend class Tree_const_iterator;
+
+    template <class>
+    friend struct Tree_node;
+
     using Self = avltree<Kty, Ty, Compr_t>;
+
     using iterator = Tree_iterator <
         Self, traversal_order_tag::in_order
     >;
+
     using const_iterator = Tree_const_iterator <
         Self, traversal_order_tag::in_order
     >;
 
+
 //          BST in general, but not an avl
 // [TODO]: Ctor    [x]
-// [TODO]: Dtor    []
-// [TODO]: Emplace []
+// [TODO]: Dtor    [x]
+// [TODO]: Emplace [x]
 //          balancing, convert BST to an avltree
-// [TODO]: Lrotate
-// [TODO]: Rrotate
+// [TODO]: Lrotate []
+// [TODO]: Rrotate []
+// [TODO]: manage node height
+// [TODO]: Balance
 //          sugar
 // [TODO]: Erase
 // [TODO]: (iterator case) pre_order, post_order
@@ -341,7 +361,7 @@ public:
         Mysize = 0;
     }
 
-public:
+private:
     static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
                                                    // in subtree at Pnode
         while (!Pnode->Right->Ishead) {
@@ -360,6 +380,7 @@ public:
         return Pnode;
     }
 
+public:
     iterator begin() noexcept {
         return iterator(Myhead->Left);
     }
@@ -404,20 +425,24 @@ private:
     }
 
 public:
-    template <traversal_order_tag Trot, class Pred_t>
+    template <traversal_order_tag Order, class Pred_t>
     void traversal (Nodeptr Where, Pred_t Pred) {
         if (Where) {
-            switch (Trot) {
+            switch (Order) {
                 case traversal_order_tag::in_order:
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
                     Pred(Where);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
                     break;
+
+
                 case traversal_order_tag::pre_order:
                     Pred(Where);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
                     break;
+
+
                 case traversal_order_tag::post_order:
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
