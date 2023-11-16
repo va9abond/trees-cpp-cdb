@@ -2,7 +2,7 @@
 #define TREE_HPP
 
 #define CHECK_TREE_SIZE 0
-#define RELEASE_FEATURE 0
+#define RELEASE_FEATURE 1
 
 #include "myutils.hpp"
 
@@ -39,23 +39,23 @@ public:
         return Myptr->Myval;
     }
 
-    pointer operator->() {
-        return Myptr->Myval;
+    pointer operator->() const noexcept {
+        return &(Myptr->Myval);
     }
 
     Tree_const_iterator& operator++() noexcept {
         switch (Trot) {
             case traversal_order_tag::in_order:
-                if ( Myptr->Right == nullptr ) {
-                    Nodeptr Pnode = Myptr;
-                    while ( (Pnode = Myptr->Parent) && Myptr == Pnode->Right ) {
+                if ( Myptr->Right->Ishead ) {
+                    Nodeptr Pnode = nullptr;
+                    while ( !(Pnode = Myptr->Parent)->Ishead && Myptr == Pnode->Right ) {
                         Myptr = Pnode;
                     }
                     Myptr = Pnode;
                 } else {
                     Myptr = Mytree::Min_(Myptr->Right);
                 }
-                return &this;
+                return *this;
                 break;
             case traversal_order_tag::pre_order:
 
@@ -78,13 +78,15 @@ public:
             case traversal_order_tag::in_order:
                 if (Myptr->Ishead) { // --end() ==> rightmost
                     Myptr = Myptr->Right;
-                } else if (Myptr->Left == nullptr) {
-                    Nodeptr Pnode = Myptr;
-                    while ( (Pnode = Myptr->Parent) && Myptr == Pnode->Left ) {
+                } else if (Myptr->Left->Ishead) {
+                    Nodeptr Pnode = nullptr;
+                    while ( !(Pnode = Myptr->Parent)->Ishead && Myptr == Pnode->Left ) {
                         Myptr = Pnode;
                     }
-                    if (!Myptr->Ishead) { // decrement non-head
-                        Myptr = Pnode;
+                    if (!Myptr->Ishead) { // decrement non-begin()
+                        Myptr = Pnode;    // if Myptr->Ishead, then Myptr was
+                                          // always a left child during we have
+                                          // been climbind up the tree
                     }
                 } else {
                     Myptr = Mytree::Max_(Myptr->Left);
@@ -204,12 +206,12 @@ struct Tree_node {
         return Newnode;
     }
 
-    static void Free_node0 (Nodeptr Ptr) noexcept {
+    static void Free_node0 (Nodeptr Ptr) noexcept { // deallocate node with no data (Myhead)
         Ptr->Left = nullptr; Ptr->Right = nullptr; Ptr->Parent = nullptr;
         delete Ptr; Ptr = nullptr;
     }
 
-    static void Free_node (Nodeptr Ptr) noexcept {
+    static void Free_node (Nodeptr Ptr) noexcept { // deallocate node with data
         Ptr->Myval.~Value_type();
         Free_node0(Ptr);
     }
@@ -324,15 +326,14 @@ private:
     }
 
     void Erase_tree (Nodeptr Rootnode) noexcept {
-        while (Rootnode) {
-        // while (!Rootnode->Ishead) {
+        while (!Rootnode->Ishead) {
             Erase_tree(Rootnode->Right);
             Node::Free_node(std::exchange(Rootnode, Rootnode->Left));
         }
     }
 
 public:
-    void clear() noexcept {
+    void clear() noexcept { // get back tree to init state
         Erase_tree(Myhead->Parent);
         Myhead->Parent = Myhead;
         Myhead->Left = Myhead;
@@ -343,7 +344,7 @@ public:
 public:
     static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
                                                    // in subtree at Pnode
-        while (Pnode->Right != nullptr) {
+        while (!Pnode->Right->Ishead) {
             Pnode = Pnode->Right;
         }
 
@@ -352,7 +353,7 @@ public:
 
     static Nodeptr Min_ (Nodeptr Pnode) noexcept { // return leftmost node
                                                    // in subtree at Pnode
-        while (Pnode->Left) {
+        while (!Pnode->Left->Ishead) {
             Pnode = Pnode->Left;
         }
 
@@ -437,18 +438,18 @@ private:
 
 #if RELEASE_FEATURE
 Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
-    Tree_find_result Loc { Myhead->Parent, Tree_child::Right };
+    Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
     Nodeptr Trynode = Loc.Parent;
     key_compare Pred = key_comp();
 
-    while (Trynode) {
+    while (Trynode && Trynode != Myhead) {
         Loc.Parent = Trynode;
         if (Pred(Traits::Kfn(Trynode->Myval), key)) {
             Loc.Child = Tree_child::Right;
             Trynode = Trynode->Right;
         } else {
             Loc.Child = Tree_child::Left;
-            // Result.Bound = Trynode;
+            Loc.Bound = Trynode;
             Trynode = Trynode->Left;
         }
     }
