@@ -462,63 +462,67 @@ private:
 #endif
 
 #if RELEASE_FEATURE
-Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
-    Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
-    Nodeptr Trynode = Loc.Parent;
-    key_compare Pred = key_comp();
+    Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
+        Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
+        Nodeptr Trynode = Loc.Parent;
+        key_compare Pred = key_comp();
 
-    while (Trynode && Trynode != Myhead) {
-        Loc.Parent = Trynode;
-        if (Pred(Traits::Kfn(Trynode->Myval), key)) {
-            Loc.Child = Tree_child::Right;
-            Trynode = Trynode->Right;
-        } else {
-            Loc.Child = Tree_child::Left;
-            Loc.Bound = Trynode;
-            Trynode = Trynode->Left;
+        while (Trynode && Trynode != Myhead) {
+            Loc.Parent = Trynode;
+            if (Pred(Traits::Kfn(Trynode->Myval), key)) {
+                Loc.Child = Tree_child::Right;
+                Trynode = Trynode->Right;
+            } else {
+                Loc.Child = Tree_child::Left;
+                Loc.Bound = Trynode;
+                Trynode = Trynode->Left;
+            }
         }
+        return Loc;
     }
-    return Loc;
-}
 
-template <class... Valtys>
-std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
-    Nodeptr Inserted = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
-    const key_type& key = Traits::Kfn(Inserted->Myval);
-    Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
-    // Check_grow_by_1();
+private:
+    template <class... Valtys>
+        std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
+            Nodeptr Inserted = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
+            const key_type& key = Traits::Kfn(Inserted->Myval);
+            Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
+            // Check_grow_by_1();
 
-    return { Insert_node(Loc, Inserted), true };
-}
+            return { Insert_node(Loc, Inserted), true };
+        }
 
-Nodeptr Insert_node (const Tree_find_result<Nodeptr> Loc, const Nodeptr Newnode) noexcept {
-    ++Mysize;
-    Newnode->Parent = Loc.Parent;
-    if (Loc.Parent == Myhead) {    // <=> Mysize == 0,
-                                   // first node in tree, just set head values
-        Myhead->Left = Newnode;   // set min()
-        Myhead->Right = Newnode;  // set max()
-        Myhead->Parent = Newnode; // set root
+    Nodeptr Insert_node (const Tree_find_result<Nodeptr> Loc, const Nodeptr Newnode) noexcept {
+        ++Mysize;
+        Newnode->Parent = Loc.Parent;
+        if (Loc.Parent == Myhead) {    // <=> Mysize == 0,
+                                       // first node in tree, just set head values
+            Myhead->Left = Newnode;   // set min()
+            Myhead->Right = Newnode;  // set max()
+            Myhead->Parent = Newnode; // set root
+            return Newnode;
+        }
+
+        if (Loc.Child == Tree_child::Right) { // add to right of Loc.Parent
+            Loc.Parent->Right = Newnode;
+            if (Loc.Parent == Myhead->Right) { // if Newnode right of max(), then Newnode is new max()
+                Myhead->Right = Newnode;
+            }
+        } else {
+            Loc.Parent->Left = Newnode;
+            if (Loc.Parent == Myhead->Left) { // if Newnode left of min(), then Newnode is new min()
+                Myhead->Left = Newnode;
+            }
+        }
+
+        // [TODO]: Balance
+
         return Newnode;
     }
-
-    if (Loc.Child == Tree_child::Right) { // add to right of Loc.Parent
-        Loc.Parent->Right = Newnode;
-        if (Loc.Parent == Myhead->Right) { // if Newnode right of max(), then Newnode is new max()
-            Myhead->Right = Newnode;
-        }
-    } else {
-        Loc.Parent->Left = Newnode;
-        if (Loc.Parent == Myhead->Left) { // if Newnode left of min(), then Newnode is new min()
-            Myhead->Left = Newnode;
-        }
-    }
-
-    // [TODO]: Balance
-
-    return Newnode;
-}
 #endif
+
+
+
 
 public:
     Nodeptr Myhead; // pointer to head node
