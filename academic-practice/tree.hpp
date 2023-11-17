@@ -431,13 +431,13 @@ public:
             switch (Order) {
                 case traversal_order_tag::in_order:
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
-                    Pred(Where);
+                    Pred(Where->Myval);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
                     break;
 
 
                 case traversal_order_tag::pre_order:
-                    Pred(Where);
+                    Pred(Where->Myval);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
                     break;
@@ -446,7 +446,7 @@ public:
                 case traversal_order_tag::post_order:
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
                     traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
-                    Pred(Where);
+                    Pred(Where->Myval);
                     break;
             }
         }
@@ -483,14 +483,14 @@ private:
 
 private:
     template <class... Valtys>
-        std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
-            Nodeptr Inserted = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
-            const key_type& key = Traits::Kfn(Inserted->Myval);
-            Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
-            // Check_grow_by_1();
+    std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
+        Nodeptr Inserted = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
+        const key_type& key = Traits::Kfn(Inserted->Myval);
+        Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
+        // Check_grow_by_1();
 
-            return { Insert_node(Loc, Inserted), true };
-        }
+        return { Insert_node(Loc, Inserted), true };
+    }
 
     Nodeptr Insert_node (const Tree_find_result<Nodeptr> Loc, const Nodeptr Newnode) noexcept {
         ++Mysize;
