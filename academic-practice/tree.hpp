@@ -468,13 +468,18 @@ private:
 #endif
 
 #if RELEASE_FEATURE
-    Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
+    Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key, bool update = true) const {
         Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
         Nodeptr Trynode = Loc.Parent;
         key_compare Pred = key_comp();
 
         while (Trynode && Trynode != Myhead) {
             Loc.Parent = Trynode;
+
+            if (update) {
+                ++Trynode->Height;
+            }
+
             if (Pred(Traits::Kfn(Trynode->Myval), key)) {
                 Loc.Child = Tree_child::Right;
                 Trynode = Trynode->Right;
@@ -521,6 +526,8 @@ private:
             }
         }
 
+        Newnode->Height = Loc.Parent->Height - 1;
+
         // [TODO]: Balance
 
         return Newnode;
@@ -547,6 +554,9 @@ void Rrotate (Nodeptr Where) noexcept { // promote left child to root of subtree
 
     Newroot->Right = Where;
     Where->Parent = Newroot;
+
+    Update_height(Where);
+    Update_height(Newroot);
 }
 
 void Lrotate (Nodeptr Where) noexcept { // promote right child to root of subtree
@@ -570,8 +580,22 @@ void Lrotate (Nodeptr Where) noexcept { // promote right child to root of subtre
 
     Newroot->Left = Where;
     Where->Parent = Newroot;
+
+    Update_height(Where);
+    Update_height(Newroot);
 }
 
+unsigned Subtree_height (Nodeptr Subroot) const noexcept {
+    return (Subroot->Ishead ? 0 : Subroot->Height);
+}
+
+int Skew (Nodeptr Subroot) const noexcept { // balance factor
+    return (Subroot->Ishead ? 0 : Subtree_height(Subroot->Left) - Subtree_height(Subroot->Right));
+}
+
+void Update_height (Nodeptr Where) noexcept {
+    Where->Height = std::max(Subtree_height(Where->Left), Subtree_height(Where->Right)) + 1;
+}
 
 public:
     Nodeptr Myhead; // pointer to head node
