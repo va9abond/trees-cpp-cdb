@@ -419,6 +419,12 @@ public:
     }
 #endif
 
+    template <class... Valtys>
+    std::pair<iterator, bool> emplace (Valtys&&... Vals) {
+        const auto Result = Emplace(std::forward<Valtys>(Vals)...);
+        return { iterator(Result.first), Result.second };
+    }
+
 private:
     bool Is_equivalent (const key_type& Rhs, const key_type& Lhs) {
         return !key_compare{}(Rhs, Lhs) && !key_compare{}(Lhs, Rhs);
