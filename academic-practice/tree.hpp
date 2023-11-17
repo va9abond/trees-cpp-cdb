@@ -521,11 +521,58 @@ private:
     }
 #endif
 
+void Rrotate (Nodeptr Where) noexcept { // promote left child to root of subtree
+    Nodeptr Newroot = Where->Left;
+    Where->Left = Newroot->Right;
 
+    if (!Newroot->Right->Ishead) {
+        Newroot->Right->Parent = Where;
+    }
+
+    Newroot->Parent = Where->Parent;
+
+    if (Where == Myhead->Parent) {
+        Myhead->Parent = Newroot;
+    } else if (Where == Where->Parent->Right) {
+        Where->Parent->Right = Newroot;
+    } else {
+        Where->Parent->Left = Newroot;
+    }
+
+    Newroot->Right = Where;
+    Where->Parent = Newroot;
+}
+
+void Lrotate (Nodeptr Where) noexcept { // promote right child to root of subtree
+    Nodeptr Newroot = Where->Right;
+                                       // transfer B subtree
+    Where->Right = Newroot->Left;
+                                       // if subtree B not nullptr then change is's parent
+    if (!Newroot->Left->Ishead) {
+        Newroot->Left->Parent = Where;
+    }
+                                       // change Parent of Newroot
+    Newroot->Parent = Where->Parent;
+                                       // change Parent ptr to Newroot
+    if (Where == Myhead->Parent) {     // if where is root of entire tree
+        Myhead->Parent = Newroot;
+    } else if (Where->Parent->Right == Where) { // if Where is right child
+        Where->Paretn->Right = Newroot;
+    } else {                                    // if Where is left child
+        Where->Paretn->Left = Newroot;
+    }
+
+    Newroot->Left = Where;
+    Where->Parent = Newroot;
+}
 
 
 public:
     Nodeptr Myhead; // pointer to head node
+                    // Myhead->Parent is root of entire tree
+                    // Myhead->Parent->Parent is Myhead
+                    // Myhead->Right rightmost leaf in tree
+                    // Myhead->Left leftmost leaf in tree
     size_type Mysize; // number of elements
 };
 
