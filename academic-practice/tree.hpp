@@ -33,6 +33,7 @@ public:
 
     Tree_const_iterator& operator= (const Tree_const_iterator& Rhs) {
         Myptr = Rhs.Myptr;
+        return *this;
     }
 
     reference operator*() const noexcept {
@@ -73,7 +74,6 @@ public:
         ++*this;
         return Tmp;
     }
-
 
     Tree_const_iterator& operator--() noexcept {
         switch (Order) {
@@ -208,7 +208,7 @@ struct Tree_node {
         Newnode->Left = Myhead;
         Newnode->Right = Myhead;
         Newnode->Parent = Myhead;
-        Newnode->Height = 1;
+        Newnode->Height = 0;
         return Newnode;
     }
 
@@ -242,7 +242,8 @@ struct Tree_traits {
     using Node            = Tree_node<value_type>;
     using Nodeptr         = Tree_node<value_type>*;
 
-    struct value_compare {
+
+    struct value_compare { // comparator for keys
         value_compare (key_compare Pred) : comp(Pred) {}
 
         bool operator() (const value_type& Rhs, const value_type& Lhs) const {
@@ -251,6 +252,7 @@ struct Tree_traits {
 
         key_compare comp;
     };
+
 
     template <class Ty1, class Ty2>
     static const key_type& Kfn (const std::pair<Ty1, Ty2>& Val) { // extract key from value
@@ -266,8 +268,8 @@ enum class Tree_child {
     Unused // indicates that tree child should never be used for insertion
 };
 
-template <class Nodeptr>
-struct Tree_find_result {
+
+template <class Nodeptr> struct Tree_find_result {
     Nodeptr Parent; // the leaf node under which a new node should be inserted
     Tree_child Child;
     Nodeptr Bound;
@@ -298,6 +300,7 @@ public:
     using reference       = typename Traits::reference;
     using const_reference = typename Traits::const_reference;
 
+                       // make friends, but not in real life
     template <class, traversal_order_tag>
     friend class Tree_iterator;
 
@@ -306,6 +309,7 @@ public:
 
     template <class>
     friend struct Tree_node;
+
 
     using Self = avltree<Kty, Ty, Compr_t>;
 
@@ -318,18 +322,10 @@ public:
     >;
 
 
-//          BST in general, but not an avl
-// [TODO]: Ctor    [x]
-// [TODO]: Dtor    [x]
-// [TODO]: Emplace [x]
-//          balancing, convert BST to an avltree
-// [TODO]: Lrotate []
-// [TODO]: Rrotate []
-// [TODO]: manage node height
-// [TODO]: Balance
-//          sugar
 // [TODO]: Erase
 // [TODO]: (iterator case) pre_order, post_order
+// [IDEA]: Ghost node for balancing and rotations
+
 
     avltree() noexcept : Myhead(), Mysize(0) {
         Myhead = Node::Buy_head_node();
@@ -367,7 +363,6 @@ private:
         while (!Pnode->Right->Ishead) {
             Pnode = Pnode->Right;
         }
-
         return Pnode;
     }
 
@@ -376,7 +371,6 @@ private:
         while (!Pnode->Left->Ishead) {
             Pnode = Pnode->Left;
         }
-
         return Pnode;
     }
 
@@ -435,25 +429,25 @@ public:
     void traversal (Nodeptr Where, Pred_t Pred) {
         if (Where) {
             switch (Order) {
-                case traversal_order_tag::in_order:
-                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
-                    Pred(Where->Myval);
-                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
-                    break;
+case traversal_order_tag::in_order:
+                traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
+                Pred(Where->Myval);
+                traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
+                break;
 
 
-                case traversal_order_tag::pre_order:
-                    Pred(Where->Myval);
-                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
-                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
-                    break;
+case traversal_order_tag::pre_order:
+                Pred(Where->Myval);
+                traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
+                traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
+                break;
 
 
-                case traversal_order_tag::post_order:
-                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
-                    traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
-                    Pred(Where->Myval);
-                    break;
+case traversal_order_tag::post_order:
+                traversal<traversal_order_tag::in_order, Pred_t>(Where->Left, Pred);
+                traversal<traversal_order_tag::in_order, Pred_t>(Where->Right, Pred);
+                Pred(Where->Myval);
+                break;
             }
         }
     }
@@ -468,17 +462,13 @@ private:
 #endif
 
 #if RELEASE_FEATURE
-    Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key, bool update = true) const {
+    Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
         Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
         Nodeptr Trynode = Loc.Parent;
         key_compare Pred = key_comp();
 
-        while (Trynode && Trynode != Myhead) {
+        while (!Trynode->Ishead) {
             Loc.Parent = Trynode;
-
-            if (update) {
-                ++Trynode->Height;
-            }
 
             if (Pred(Traits::Kfn(Trynode->Myval), key)) {
                 Loc.Child = Tree_child::Right;
@@ -495,12 +485,21 @@ private:
 private:
     template <class... Valtys>
     std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
-        Nodeptr Inserted = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
-        const key_type& key = Traits::Kfn(Inserted->Myval);
-        Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
         // Check_grow_by_1();
 
-        return { Insert_node(Loc, Inserted), true };
+        Nodeptr Inserting = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
+        const key_type& key = Traits::Kfn(Inserting->Myval);
+
+        Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
+        return { Insert_node(Loc, Inserting), true };
+    }
+
+    void Balance_tree_up (Nodeptr Pnode) {
+        while (!Pnode->Ishead) {
+            Update_height(Pnode);
+            Pnode = Balance(Pnode);
+            Pnode = Pnode->Parent;
+        }
     }
 
     Nodeptr Insert_node (const Tree_find_result<Nodeptr> Loc, const Nodeptr Newnode) noexcept {
@@ -526,76 +525,173 @@ private:
             }
         }
 
-        Newnode->Height = Loc.Parent->Height - 1;
-
-        // [TODO]: Balance
-
+        Balance_tree_up(Loc.Parent);
         return Newnode;
     }
 #endif
 
-void Rrotate (Nodeptr Where) noexcept { // promote left child to root of subtree
-    Nodeptr Newroot = Where->Left;
-    Where->Left = Newroot->Right;
+    Nodeptr Rrotate (Nodeptr Where) noexcept { // promote left child to root of subtree
+        Nodeptr Newroot = Where->Left; // Newroot <=> x, Where <=> y
+        Where->Left = Newroot->Right;
 
-    if (!Newroot->Right->Ishead) {
-        Newroot->Right->Parent = Where;
+        if (!Newroot->Right->Ishead) {
+            Newroot->Right->Parent = Where;
+        }
+
+        Newroot->Parent = Where->Parent;
+
+        if (Where == Myhead->Parent) {
+            Myhead->Parent = Newroot;
+        } else if (Where == Where->Parent->Right) {
+            Where->Parent->Right = Newroot;
+        } else {
+            Where->Parent->Left = Newroot;
+        }
+
+        Newroot->Right = Where;
+        Where->Parent = Newroot;
+
+        Update_height(Where);
+        Update_height(Newroot);
+
+        return Newroot;
     }
 
-    Newroot->Parent = Where->Parent;
+    Nodeptr Lrotate (Nodeptr Where) noexcept { // promote right child to root of subtree
+        Nodeptr Newroot = Where->Right; // Newroot <=> y, Where <=> x
+                                           // transfer B subtree
+        Where->Right = Newroot->Left;
+                                           // if subtree B not nullptr then change is's parent
+        if (!Newroot->Left->Ishead) {
+            Newroot->Left->Parent = Where;
+        }
+                                           // change Parent of Newroot
+        Newroot->Parent = Where->Parent;
+                                           // change Parent ptr to Newroot
+        if (Where == Myhead->Parent) {     // if where is root of entire tree
+            Myhead->Parent = Newroot;
+        } else if (Where->Parent->Right == Where) { // if Where is right child
+            Where->Parent->Right = Newroot;
+        } else {                                    // if Where is left child
+            Where->Parent->Left = Newroot;
+        }
 
-    if (Where == Myhead->Parent) {
-        Myhead->Parent = Newroot;
-    } else if (Where == Where->Parent->Right) {
-        Where->Parent->Right = Newroot;
-    } else {
-        Where->Parent->Left = Newroot;
+        Newroot->Left = Where;
+        Where->Parent = Newroot;
+
+        Update_height(Where);
+        Update_height(Newroot);
+
+        return Newroot;
     }
 
-    Newroot->Right = Where;
-    Where->Parent = Newroot;
+    Nodeptr Balance (const Nodeptr Pnode) { // return new subroot
+        const int Balance_factor = Skew(Pnode);
 
-    Update_height(Where);
-    Update_height(Newroot);
-}
+        if (Balance_factor > 1) // left subtree higher then right
+        {
+            if (Skew(Pnode->Right) < 0) { // case 3: skew(z) = -1
+                Rrotate(Pnode->Right); // Rrotate(z)
+            }
+            return Lrotate(Pnode); // Lrotate(x)
+        }
+        else if (Balance_factor < -1)
+        {
+            if (Skew(Pnode->Left) > 0) {
+                Lrotate(Pnode->Left); // Rrotate(z)
+            }
+            return Rrotate(Pnode); // Lrotate(x)
+        }
 
-void Lrotate (Nodeptr Where) noexcept { // promote right child to root of subtree
-    Nodeptr Newroot = Where->Right;
-                                       // transfer B subtree
-    Where->Right = Newroot->Left;
-                                       // if subtree B not nullptr then change is's parent
-    if (!Newroot->Left->Ishead) {
-        Newroot->Left->Parent = Where;
-    }
-                                       // change Parent of Newroot
-    Newroot->Parent = Where->Parent;
-                                       // change Parent ptr to Newroot
-    if (Where == Myhead->Parent) {     // if where is root of entire tree
-        Myhead->Parent = Newroot;
-    } else if (Where->Parent->Right == Where) { // if Where is right child
-        Where->Paretn->Right = Newroot;
-    } else {                                    // if Where is left child
-        Where->Paretn->Left = Newroot;
+        return Pnode; // balancing isn't necessary
     }
 
-    Newroot->Left = Where;
-    Where->Parent = Newroot;
+    unsigned Subtree_height (Nodeptr Subroot) const noexcept {
+        return (Subroot->Ishead ? 0 : Subroot->Height);
+    }
 
-    Update_height(Where);
-    Update_height(Newroot);
+    int Skew (Nodeptr Subroot) const noexcept { // balance factor
+        return (Subroot->Ishead ? 0 : Subtree_height(Subroot->Right) - Subtree_height(Subroot->Left));
+    }
+
+    void Update_height (Nodeptr Where) noexcept {
+        // Where->Height = 1 + std::max(Subtree_height(Where->Left), Subtree_height(Where->Right));
+
+        Where->Height = (
+                Where->Left->Ishead && Where->Right->Ishead ?
+                    0 : 1 + std::max(Subtree_height(Where->Left), Subtree_height(Where->Right))
+        );
+    }
+
+private:
+                                                  // Thanks:
+// https://www.techiedelight.com/c-program-print-binary-tree/
+    struct Trunk {
+        Trunk *prev;
+        std::string str;
+
+        Trunk(Trunk *prev, std::string str)
+        {
+            this->prev = prev;
+            this->str = str;
+        }
+    };
+
+    // Helper function to print branches of the binary tree
+    void showTrunks(Trunk *p) {
+        using std::cout;
+
+        if (p == nullptr) {
+            return;
+        }
+
+        showTrunks(p->prev);
+        cout << p->str;
+    }
+
+    void printTree(Nodeptr root, Trunk *prev, bool isLeft) {
+        using std::string;
+        using std::endl;
+        using std::cout;
+
+        if (root->Ishead) {
+            return;
+        }
+
+        string prev_str = "    ";
+        Trunk *trunk = new Trunk(prev, prev_str);
+
+        printTree(root->Right, trunk, true);
+
+        if (!prev) {
+            trunk->str = "———";
+        } else if (isLeft) {
+            trunk->str = ".———";
+            prev_str = "   |";
+        } else {
+            trunk->str = "`———";
+            prev->str = prev_str;
+        }
+
+    showTrunks(trunk);
+
+    const auto mv = root->Myval;
+    printf("{%d,%d; %d}\n", mv.first, mv.second, root->Height);
+
+    if (prev) {
+        prev->str = prev_str;
+    }
+
+    trunk->str = "   |";
+
+    printTree(root->Left, trunk, false);
+    delete(trunk);
 }
 
-unsigned Subtree_height (Nodeptr Subroot) const noexcept {
-    return (Subroot->Ishead ? 0 : Subroot->Height);
-}
-
-int Skew (Nodeptr Subroot) const noexcept { // balance factor
-    return (Subroot->Ishead ? 0 : Subtree_height(Subroot->Left) - Subtree_height(Subroot->Right));
-}
-
-void Update_height (Nodeptr Where) noexcept {
-    Where->Height = std::max(Subtree_height(Where->Left), Subtree_height(Where->Right)) + 1;
-}
+public:
+    void print_tree() {
+        printTree(Myhead->Parent, nullptr, false);
+    }
 
 public:
     Nodeptr Myhead; // pointer to head node
@@ -605,10 +701,6 @@ public:
                     // Myhead->Left leftmost leaf in tree
     size_type Mysize; // number of elements
 };
-
-
-
-
 
 
 #endif // TREE_HPP
