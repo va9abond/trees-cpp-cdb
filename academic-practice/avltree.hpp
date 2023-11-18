@@ -366,6 +366,22 @@ public:
         return const_iterator(Find_lower_bound(key).Bound);
     }
 
+    iterator max() {
+        return iterator(Myhead->Right);
+    }
+
+    const_iterator max() const {
+        return const_iterator(Myhead->Right);
+    }
+
+    iterator min() {
+        return iterator(Myhead->Left);
+    }
+
+    const iterator min() const {
+        return const_iterator(Myhead->Left);
+    }
+
 private:
     static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
                                                    // in subtree at Pnode
