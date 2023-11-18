@@ -255,7 +255,7 @@ struct Tree_traits {
 
 
     template <class Ty1, class Ty2>
-    static const key_type& Kfn (const std::pair<Ty1, Ty2>& Val) { // extract key from value
+    static const key_type& Extract_key (const std::pair<Ty1, Ty2>& Val) { // extract key from value
         return Val.first;
     }
 };
@@ -495,7 +495,7 @@ private:
         while (!Trynode->Ishead) {
             Loc.Parent = Trynode;
 
-            if (Pred(Traits::Kfn(Trynode->Myval), key)) {
+            if (Pred(Traits::Extract_key(Trynode->Myval), key)) {
                 Loc.Child = Tree_child::Right;
                 Trynode = Trynode->Right;
             } else {
@@ -507,13 +507,19 @@ private:
         return Loc;
     }
 
+    bool Lower_bound_duplicate (const Nodeptr Bound, const key_type& Key) const {
+        key_compare Pred = key_comp();
+        return !Bound->Ishead && static_cast<bool>(Pred(Key, Traits::Extract_key(Bound->Myval)));
+        // if element with Key already exists than Bound is node with Key
+    }
+
 private:
     template <class... Valtys>
     std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
         // Check_grow_by_1();
 
         Nodeptr Inserting = Node::Buy_node(Myhead, std::forward<Valtys>(Vals)...);
-        const key_type& key = Traits::Kfn(Inserting->Myval);
+        const key_type& key = Traits::Extract_key(Inserting->Myval);
 
         Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
         return { Insert_node(Loc, Inserting), true };
