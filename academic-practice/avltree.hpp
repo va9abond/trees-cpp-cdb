@@ -357,6 +357,15 @@ public:
         Mysize = 0;
     }
 
+public:
+    iterator lower_bound (const key_type& key) {
+        return iterator(Find_lower_bound(key).Bound);
+    }
+
+    const_iterator lower_bound (const key_type& key) const {
+        return const_iterator(Find_lower_bound(key).Bound);
+    }
+
 private:
     static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
                                                    // in subtree at Pnode
