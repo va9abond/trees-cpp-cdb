@@ -382,6 +382,14 @@ public:
         return const_iterator(Myhead->Left);
     }
 
+    iterator find (const key_type& key) {
+        return iterator(Find(key));
+    }
+
+    const_iterator find (const key_type& key) const {
+        return const_iterator(Find(key));
+    }
+
 private:
     static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
                                                    // in subtree at Pnode
