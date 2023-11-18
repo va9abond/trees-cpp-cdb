@@ -24,7 +24,7 @@ int main()
 {
 #if 1
     alias::laptop_map lmap = create_laptop_map(13);
-    msl::print(lmap);
+    // msl::print(lmap);
 
     // std::cout << recursin(10);
     // std::cout << std::max(1,1);
@@ -39,7 +39,7 @@ int main()
 
     avltree<int, int> tree;
     tree.emplace(51,  12);
-    tree.emplace(924, 32094);
+    tree.emplace(924, 320);
     tree.emplace(3,   80);
     tree.emplace(23,  91);
     tree.emplace(12,  15);
@@ -48,12 +48,24 @@ int main()
     tree.emplace(1,   4);
     tree.emplace(99,  34);
     tree.emplace(99, 233);
+    tree.emplace(100, 14);
+    tree.emplace(1000, 7);
+    tree.emplace(0, 32);
 
     auto iter = tree.begin();
     while (iter != tree.end()) {
         printf("{%d, %d}, h = %u\n", iter->first, (*iter).second, iter.Myptr->Height);
         ++iter;
     }
+
+    tree.print_tree();
+
+    printf("\n");
+    iter = tree.end();
+    auto& key1 = iter.Myptr->Left->Myval.first;
+    printf("(%d)\n", key1);
+    auto& key2 = iter.Myptr->Right->Myval.first;
+    printf("(%d)\n", key2);
 
 
     // std::function<void(const std::pair<const int, int>&)> Pred = [](const std::pair<const int, int>& p) {
