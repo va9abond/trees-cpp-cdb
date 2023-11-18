@@ -399,6 +399,15 @@ private:
         return Pnode;
     }
 
+    Nodeptr Find (const key_type& key) const {
+        const Tree_find_result<Nodeptr> Loc = Find_lower_bound(key);
+        if (Lower_bound_duplicate(Loc.Bound, key)) { // key exists and equals Loc.Bound's key
+            return Loc.Bound;
+        }
+
+        return Myhead;
+    }
+
 public:
     iterator begin() noexcept {
         return iterator(Myhead->Left);
@@ -486,7 +495,7 @@ private:
     }
 #endif
 
-#if RELEASE_FEATURE
+private:
     Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
         Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
         Nodeptr Trynode = Loc.Parent;
@@ -513,7 +522,6 @@ private:
         // if element with Key already exists than Bound is node with Key
     }
 
-private:
     template <class... Valtys>
     std::pair<Nodeptr, bool> Emplace (Valtys&&... Vals) {
         // Check_grow_by_1();
@@ -559,7 +567,6 @@ private:
         Balance_tree_up(Loc.Parent);
         return Newnode;
     }
-#endif
 
     Nodeptr Rrotate (Nodeptr Where) noexcept { // promote left child to root of subtree
         Nodeptr Newroot = Where->Left; // Newroot <=> x, Where <=> y
@@ -653,8 +660,6 @@ private:
                     0 : 1 + std::max(Subtree_height(Where->Left), Subtree_height(Where->Right))
         );
     }
-
-private:
                                                   // Thanks:
 // https://www.techiedelight.com/c-program-print-binary-tree/
     struct Trunk {
@@ -724,7 +729,6 @@ public:
         printTree(Myhead->Parent, nullptr, false);
     }
 
-public:
     Nodeptr Myhead; // pointer to head node
                     // Myhead->Parent is root of entire tree
                     // Myhead->Parent->Parent is Myhead
