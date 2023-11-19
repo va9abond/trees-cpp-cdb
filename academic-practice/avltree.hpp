@@ -759,7 +759,7 @@ private:
     }
 
     bool Lower_bound_duplicate (const Nodeptr Bound, const key_type& Key) const {
-        return !Bound->Ishead && static_cast<bool>(Is_equivalent(Key, Traits::Extract_key(Bound->Myval)));
+        return !Bound->Ishead && (Is_equivalent(Key, Traits::Extract_key(Bound->Myval)));
         // if element with Key already exists than Bound is node with Key
     }
 
@@ -967,6 +967,7 @@ private:
 
 public:
     void print_tree() {
+        if (Mysize == 0) { printf("tree is empty\n"); return; }
         printTree(Myhead->Parent, nullptr, false);
     }
 
@@ -978,5 +979,21 @@ public:
     size_type Mysize; // number of elements
 };
 
+
+namespace msl {
+
+    template <
+        class Iter_t = avltree<int,int>::iterator
+    >
+    inline void print_tree_iter (const Iter_t& iter) {
+        printf("{%d, %d}, h = %u\n", iter->first, iter->second, iter.Myptr->Height);
+    }
+}
+
+
+namespace alias {
+    using tr_const_iter = avltree<int,int>::const_iterator;
+    using tr_iter = avltree<int, int>::iterator;
+}
 
 #endif // TREE_HPP
