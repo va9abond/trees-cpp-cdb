@@ -4,6 +4,7 @@
 
 #include "laptop.hpp"
 #include "myutils.hpp"
+#include "avltree.hpp"
 
 
 // =============================================================================
@@ -369,12 +370,145 @@ inline void task2_3_presentation (int count) {
     msl::print(create_laptop_prq(count));
 }
 // =============================================================================
-// ================================ 2_1_3 ======================================
+// ================================ 2_4_1 ======================================
 // =============================================================================
-//
-//
-//
-//
+
+template <
+    class Iter_t = alias::tr_const_iter,
+    class Kty
+>
+inline Iter_t find_by_key (const avltree<int, int>& tree, const Kty& key) {
+    return tree.find(key);
+}
+
+template <
+    class Iter_t = alias::tr_const_iter
+>
+inline Iter_t find_by_value (const avltree<int, int>& tree, const int Val) {
+    auto iter = tree.begin();
+    while (iter != tree.end()) {
+        if (iter->second == Val) {
+            break;
+        }
+        ++iter;
+    }
+    return iter;
+}
+
+inline void task2_4presentation() {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.4" << "\n";
+    printf("Output tree by iterators\n");
+
+    // Use <int, int> not <laptop_key, laptop> to
+    // make size of output smaller
+    avltree<int, int> tree;
+    tree.emplace(51,  12);
+    tree.emplace(924, 320);
+    tree.emplace(3,   80);
+    tree.emplace(23,  91);
+    tree.emplace(12,  15);
+    tree.emplace(83,  42);
+    tree.emplace(13,  13);
+    tree.emplace(1,   4);
+    tree.emplace(99,  34);
+    tree.emplace(99, 233);
+    tree.emplace(100, 14);
+    tree.emplace(1000, 7);
+    tree.emplace(0, 32);
+
+    tree.print_tree();
+
+    std::cout << "\n";
+    std::cout.width(30); cout << right << "Ascending order" << "\n";
+
+    std::cout.width(30); cout << right << "{x, y}, z" << "\n";
+    std::cout.width(30); cout << right << "x - key" << "\n";
+    std::cout.width(30); cout << right << "y - value" << "\n";
+    std::cout.width(30); cout << right << "z - node height" << "\n";
+
+    auto iter = tree.begin();
+    while (iter != tree.end()) {
+        printf("{%d, %d}, h = %u\n", iter->first, (*iter).second, iter.Myptr->Height);
+        ++iter;
+    }
+
+    std::cout.width(30); cout << right << "Descending order" << "\n";
+
+    while (iter != tree.begin()) {
+        --iter;
+        printf("{%d, %d}, h = %u\n", iter->first, (*iter).second, iter.Myptr->Height);
+    }
+
+
+    std::cout.width(30); cout << right << "max(), min()\n" << "\n";
+    iter = tree.max();
+    msl::print_tree_iter(iter);
+    iter = tree.min();
+    msl::print_tree_iter(iter);
+
+
+    std::cout.width(30); cout << right << "find by key, key = 3" << "\n";
+    std::cout << "finded iterator: ";
+    auto find_iter = find_by_key(tree, 3);
+    if (find_iter != tree.end()) { msl::print_tree_iter(find_iter); }
+    std::cout << "\n";
+
+    std::cout.width(30); cout << right << "find by value, value = 42" << "\n";
+    std::cout << "finded iterator: ";
+    find_iter = find_by_value(tree, 42);
+    if (find_iter != tree.end()) { msl::print_tree_iter(find_iter); }
+    std::cout << "\n";
+
+
+    std::cout.width(30); cout << right << "Erasing" << "\n";
+
+    iter = tree.begin();
+    while (iter != tree.end()) {
+        printf("ERASE: %d\n", iter->first);
+        const auto& [it, success] = tree.erase(iter->first);
+        if (success == false) {
+            printf("\nSTOP STOP STOP STOP STOP STOP STOP STOP STOP\n");
+        }
+        tree.print_tree();
+        printf("\n\n");
+        iter = it;
+    }
+}
+
+
+inline void task2_5presentation() {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.4" << "\n";
+    printf("Output tree by iterators\n");
+
+    // Use <int, int> not <laptop_key, laptop> to
+    // make size of output smaller
+    avltree<int, int> tree;
+    tree.emplace(51,  12);
+    tree.emplace(51,  24);
+    tree.emplace(1,   4);
+    tree.emplace(1,   8);
+    tree.emplace(99,  34);
+    tree.emplace(99, 233);
+    tree.emplace(0, 32);
+
+    tree.print_tree();
+
+    // msl::print_tree_iter(tree[4]); // throw exception
+    msl::print_tree_iter(tree[51]);
+    msl::print_tree_iter(tree[0]);
+    msl::print_tree_iter(tree[1]);
+}
+
+
+
+
+
 // =============================================================================
 // ================================ 2_1_3 ======================================
 // =============================================================================
