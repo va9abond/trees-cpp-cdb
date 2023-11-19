@@ -606,11 +606,10 @@ private:
                 break;
 
             case 100: // case 2: only left child (child is leaf!)
+                Startnode = Pnode; // Pnode = Myhead
+                Rnode = Erased->Left;
                 switch (is_root) {
                     case 1: // Mysize = 2
-                        Startnode = Pnode; // Pnode = Myhead
-                        Rnode = Erased->Left;
-
                         // Erased is rightmost
                         Myhead->Right = Rnode;
 
@@ -619,9 +618,6 @@ private:
 
                         break;
                     case 0:
-                        Startnode = Pnode;
-                        Rnode = Erased->Left;
-
                         // Erased can be rightmost, but not leftmost
                         if (Myhead->Right == Erased) {
                             Myhead->Right = Rnode;
@@ -638,11 +634,10 @@ private:
                 }
                 break;
             case 200: // case 2: only right child (child is leaf!)
+            Startnode = Pnode;
+            Rnode = Erased->Right;
                 switch (is_root) {
                     case 1: // Mysize = 2
-                        Startnode = Pnode;
-                        Rnode = Erased->Right;
-
                         // Erased is leftmost
                         Myhead->Left = Rnode;
 
@@ -651,9 +646,6 @@ private:
 
                         break;
                     case 0:
-                        Startnode = Pnode;
-                        Rnode = Erased->Right;
-
                         // Erased can be leftmost. but not rightmost
                         if (Myhead->Left == Erased) {
                             Myhead->Left = Rnode;
@@ -671,14 +663,10 @@ private:
                 break;
 
             case 300: // case 3: both childs
+                Rnode = Result;
+                Startnode = (Rnode->Parent == Erased ? Rnode : Rnode->Parent);
                 switch (is_root) {
                     case 1:
-                        printf("CASE 300 1\n");
-                        Rnode = Result;
-                        printf("Result: %d\n", Result->Myval.first);
-                        Startnode = (Rnode->Parent == Erased ? Rnode : Rnode->Parent);
-                        printf("Startnode: %d\n", Startnode->Myval.first);
-
                         // Erased can't be rightmost or leftmost
 
                         if (Erased->Right == Rnode) {
@@ -698,9 +686,6 @@ private:
 
                         break;
                     case 0:
-                        Rnode = Result;
-                        Startnode = (Rnode->Parent == Erased ? Rnode : Rnode->Parent);
-
                         // Erased can't be rightmost or leftmost
 
                         if (Pnode->Right == Erased) {
