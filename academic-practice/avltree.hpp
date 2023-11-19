@@ -54,7 +54,7 @@ public:
                     }
                     Myptr = Pnode;
                 } else {
-                    Myptr = Mytree::Min_(Myptr->Right);
+                    Myptr = Mytree::Min(Myptr->Right);
                 }
                 return *this;
                 break;
@@ -91,7 +91,7 @@ public:
                                           // been climbind up the tree
                     }
                 } else {
-                    Myptr = Mytree::Max_(Myptr->Left);
+                    Myptr = Mytree::Max(Myptr->Left);
                 }
                 return *this;
                 break;
@@ -366,6 +366,14 @@ public:
         return const_iterator(Find_lower_bound(key).Bound);
     }
 
+    iterator upper_bound (const key_type& key) {
+        return iterator(Find_upper_bound(key).Bound);
+    }
+
+    const_iterator upper_bound (const key_type& key) const {
+        return const_iterator(Find_upper_bound(key).Bound);
+    }
+
     iterator max() {
         return iterator(Myhead->Right);
     }
@@ -391,7 +399,7 @@ public:
     }
 
 private:
-    static Nodeptr Max_ (Nodeptr Pnode) noexcept { // return rightmost node
+    static Nodeptr Max (Nodeptr Pnode) noexcept { // return rightmost node
                                                    // in subtree at Pnode
         while (!Pnode->Right->Ishead) {
             Pnode = Pnode->Right;
@@ -399,12 +407,42 @@ private:
         return Pnode;
     }
 
-    static Nodeptr Min_ (Nodeptr Pnode) noexcept { // return leftmost node
+    static Nodeptr Min (Nodeptr Pnode) noexcept { // return leftmost node
                                                    // in subtree at Pnode
         while (!Pnode->Left->Ishead) {
             Pnode = Pnode->Left;
         }
         return Pnode;
+    }
+
+    Nodeptr Next (Nodeptr Mynode) const noexcept { // return in-order successor of Node
+        Nodeptr Result = Mynode;
+        if ( Result->Right->Ishead ) {
+            Nodeptr Pnode = nullptr;
+            while ( !(Pnode = Result->Parent)->Ishead && Result == Pnode->Right ) {
+                Result = Pnode;
+            }
+            Result = Pnode;
+        } else {
+            Result = Min(Result->Right);
+        }
+        return Result;
+    }
+
+    Nodeptr Prev (Nodeptr Mynode) const noexcept { // return in-order predecessor
+        Nodeptr Result = Mynode;
+        if (Result->Left->Ishead) {
+            Nodeptr Pnode = nullptr;
+            while ( !(Pnode = Result->Parent)->Ishead && Result == Pnode->Left ) {
+                Result = Pnode;
+            }
+            if (!Result->Ishead) {
+                Result = Pnode;
+            }
+        } else {
+            Result = Max(Result->Left);
+        }
+        return Result;
     }
 
     Nodeptr Find (const key_type& key) const {
@@ -462,7 +500,7 @@ public:
     }
 
 private:
-    bool Is_equivalent (const key_type& Rhs, const key_type& Lhs) {
+    bool Is_equivalent (const key_type& Rhs, const key_type& Lhs) const {
         return !key_compare{}(Rhs, Lhs) && !key_compare{}(Lhs, Rhs);
     }
 
@@ -503,7 +541,38 @@ private:
     }
 #endif
 
+public:
+
+    std::pair<iterator, bool> erase (const key_type& Key) {
+        const auto& [Nextnode, success] = Erase(Key);
+        return { iterator(Nextnode), success };
+    }
+
 private:
+    void Erase_unchecked (Nodeptr Erase) {
+        Node::Free_node(Erase);
+    }
+
+    Tree_find_result<Nodeptr> Find_upper_bound (const key_type& key) const {
+        Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
+        Nodeptr Trynode = Loc.Parent;
+        key_compare Pred = key_comp();
+
+        while (!Trynode->Ishead) {
+            Loc.Parent = Trynode;
+
+            if (Pred(key, Traits::Extract_key(Trynode->Myval))) { // Trynode_key < key
+                Loc.Child = Tree_child::Left;
+                Loc.Bound = Trynode;
+                Trynode = Trynode->Left;
+            } else {
+                Loc.Child = Tree_child::Right;
+                Trynode = Trynode->Right;
+            }
+        }
+        return Loc;
+    }
+
     Tree_find_result<Nodeptr> Find_lower_bound (const key_type& key) const {
         Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
         Nodeptr Trynode = Loc.Parent;
@@ -512,7 +581,7 @@ private:
         while (!Trynode->Ishead) {
             Loc.Parent = Trynode;
 
-            if (Pred(Traits::Extract_key(Trynode->Myval), key)) {
+            if (Pred(Traits::Extract_key(Trynode->Myval), key)) { // Trynode_key < key
                 Loc.Child = Tree_child::Right;
                 Trynode = Trynode->Right;
             } else {
@@ -525,8 +594,7 @@ private:
     }
 
     bool Lower_bound_duplicate (const Nodeptr Bound, const key_type& Key) const {
-        key_compare Pred = key_comp();
-        return !Bound->Ishead && static_cast<bool>(Pred(Key, Traits::Extract_key(Bound->Myval)));
+        return !Bound->Ishead && static_cast<bool>(Is_equivalent(Key, Traits::Extract_key(Bound->Myval)));
         // if element with Key already exists than Bound is node with Key
     }
 
