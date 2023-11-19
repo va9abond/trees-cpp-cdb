@@ -553,6 +553,186 @@ private:
         Node::Free_node(Erase);
     }
 
+    std::pair<Nodeptr, bool> Erase (const key_type& Key) {
+        // first of all check is node with Key exists
+        const Tree_find_result<Nodeptr> Loc = Find_lower_bound(Key);
+        if (!Lower_bound_duplicate(Loc.Bound, Key)) {
+            return { Myhead, false };
+        }
+
+        // case 1: Erased is leaf (no childs) ==> just erase return in-order successor
+        // case 2: Erased has only one child ==> replace with it child ==> return in-order successor
+        // case 3: has 2 childs ==> replace with in-order successor ==> return in-order successor
+
+        Nodeptr Erased = Loc.Bound;
+        Nodeptr Pnode = Erased->Parent;
+        Nodeptr Result = Next(Erased); // the node to return
+        Nodeptr Rnode = Myhead; // the node which replace Erased
+        Nodeptr Startnode = Myhead; // the node from which the balancing starts
+
+        int is_root = 1 * (Myhead->Parent == Erased);
+        bool is_left_child = !Erased->Left->Ishead;
+        bool is_right_child = !Erased->Right->Ishead;
+        unsigned case_index = is_left_child * 100 + is_right_child * 200;
+
+        switch (case_index) {
+            case 0: // case 1: no childs
+            switch (is_root) {
+                case 1: // Erased = root (<=> Mysize = 1)
+                    // Startnode = Myhead
+                    // Rnode = Myhead
+
+                    Pnode->Right = Rnode;
+                    Pnode->Left = Rnode;
+                    Pnode->Parent = Rnode;
+
+                    break;
+                case 0: // Erased != root
+                    Startnode = Pnode;
+                    // Rnode = Myhead;
+
+                    // Erased can be both rightmost or leftmost
+                    if (Myhead->Left == Erased) { Myhead->Left = Pnode; } // Next(Erased) = Pnode
+                    if (Myhead->Right == Erased) { Myhead->Right = Pnode; } // Prev(Erased) = Pnode
+
+                    if (Pnode->Left == Erased) { // Erased is left child
+                        Pnode->Left = Rnode;
+                    } else {
+                        Pnode->Right = Rnode;
+                    }
+
+                    break;
+            }
+                break;
+
+            case 100: // case 2: only left child (child is leaf!)
+                switch (is_root) {
+                    case 1: // Mysize = 2
+                        Startnode = Pnode; // Pnode = Myhead
+                        Rnode = Erased->Left;
+
+                        // Erased is rightmost
+                        Myhead->Right = Rnode;
+
+                        Myhead->Parent = Rnode;
+                        Rnode->Parent = Pnode; // = Myhead
+
+                        break;
+                    case 0:
+                        Startnode = Pnode;
+                        Rnode = Erased->Left;
+
+                        // Erased can be rightmost, but not leftmost
+                        if (Myhead->Right == Erased) {
+                            Myhead->Right = Rnode;
+                        }
+
+                        Rnode->Parent = Pnode;
+                        if (Pnode->Right == Erased) {
+                            Pnode->Right = Rnode;
+                        } else {
+                            Pnode->Left = Rnode;
+                        }
+
+                        break;
+                }
+                break;
+            case 200: // case 2: only right child (child is leaf!)
+                switch (is_root) {
+                    case 1: // Mysize = 2
+                        Startnode = Pnode;
+                        Rnode = Erased->Right;
+
+                        // Erased is leftmost
+                        Myhead->Left = Rnode;
+
+                        Myhead->Parent = Rnode;
+                        Rnode->Parent = Pnode; // = Myhead
+
+                        break;
+                    case 0:
+                        Startnode = Pnode;
+                        Rnode = Erased->Right;
+
+                        // Erased can be leftmost. but not rightmost
+                        if (Myhead->Left == Erased) {
+                            Myhead->Left = Rnode;
+                        }
+
+                        Rnode->Parent = Pnode;
+                        if (Pnode->Right == Erased) {
+                            Pnode->Right = Rnode;
+                        } else {
+                            Pnode->Left = Rnode;
+                        }
+
+                        break;
+                }
+                break;
+
+            case 300: // case 3: both childs
+                switch (is_root) {
+                    case 1:
+                        printf("CASE 300 1\n");
+                        Rnode = Result;
+                        printf("Result: %d\n", Result->Myval.first);
+                        Startnode = (Rnode->Parent == Erased ? Rnode : Rnode->Parent);
+                        printf("Startnode: %d\n", Startnode->Myval.first);
+
+                        // Erased can't be rightmost or leftmost
+
+                        if (Erased->Right == Rnode) {
+                            Myhead->Parent = Rnode;
+                            Rnode->Parent = Myhead;
+                            Erased->Left->Parent = Rnode;
+                            Rnode->Left = Erased->Left;
+                        } else {
+                            Rnode->Parent->Left = Myhead;
+                            Myhead->Parent = Rnode;
+                            Rnode->Parent = Myhead;
+                            Erased->Right->Parent = Rnode;
+                            Rnode->Right = Erased->Right;
+                            Erased->Left->Parent = Rnode;
+                            Rnode->Left = Erased->Left;
+                        }
+
+                        break;
+                    case 0:
+                        Rnode = Result;
+                        Startnode = (Rnode->Parent == Erased ? Rnode : Rnode->Parent);
+
+                        // Erased can't be rightmost or leftmost
+
+                        if (Pnode->Right == Erased) {
+                            Pnode->Right = Rnode;
+                        } else {
+                            Pnode->Left = Rnode;
+                        }
+
+                        if (Erased->Right == Rnode) {
+                            Rnode->Parent = Pnode;
+                            Erased->Left->Parent = Rnode;
+                            Rnode->Left = Erased->Left;
+                        } else {
+                            Rnode->Parent->Left = Myhead;
+                            Rnode->Parent = Pnode;
+                            Rnode->Right = Erased->Right;
+                            Erased->Left->Parent = Rnode;
+                            Rnode->Left = Erased->Left;
+                        }
+                        break;
+                }
+                break;
+        }
+
+        Update_height(Rnode);
+        Erase_unchecked(Erased);
+        --Mysize;
+        Balance_tree_up(Startnode);
+        return { Result, true };
+    }
+
+
     Tree_find_result<Nodeptr> Find_upper_bound (const key_type& key) const {
         Tree_find_result<Nodeptr> Loc { Myhead->Parent, Tree_child::Right, Myhead };
         Nodeptr Trynode = Loc.Parent;
