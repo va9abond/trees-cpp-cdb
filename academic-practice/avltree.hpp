@@ -455,6 +455,14 @@ private:
     }
 
 public:
+    iterator operator[] (const key_type& Key) const {
+        auto Result = iterator(Find(Key));
+        if (Result == end()) {
+            throw std::runtime_error("There is no value with given key");
+        }
+        return Result;
+    }
+
     iterator begin() noexcept {
         return iterator(Myhead->Left);
     }
