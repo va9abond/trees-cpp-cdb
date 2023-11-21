@@ -88,10 +88,23 @@ public:
         return Poped;
     }
 
+    value_compare value_comp() const {
+        return Compr_t{};
+    }
+
+private:
+    bool Is_equivalent (const value_type& Rhs, const value_type& Lhs) const {
+        value_compare Pred = value_comp();
+        return !Pred(Rhs, Lhs) && !Pred(Lhs, Rhs);
+    }
+
+public:
     bool remove_val (const value_type& Val) {
+        value_compare Pred = value_comp();
+
         size_type Pos = size();
         for (size_type i = 0; i < size(); ++i) {
-            if (Mycont[i] == Val) { Pos = i; break; }
+            if ( Pred(Mycont[i], Val) ) { Pos = i; break; }
         }
 
         if ( Pos < size() ) {
@@ -137,15 +150,19 @@ private:
     }
 
     void Sift_up (size_type Posnow) {
+        value_compare Pred = value_comp();
+
         // size_type Inext = Parent_index(Posnow);
         size_type Inext = (Posnow - 1) >> 1;
-        while (Posnow > 0 && Mycont[Posnow] > Mycont[Inext]) {
+        while ( Posnow > 0 && Pred(Mycont[Inext], Mycont[Posnow]) ) {
             Swap(Posnow, Inext);
             Posnow = Inext; Inext = Parent_index(Posnow);
         }
     }
 
     void Heapify (size_type Posnow = 0) {
+        value_compare Pred = value_comp();
+
         // size_type Posright = Right_index(Posnow);
         size_type Posright = 2*Posnow + 1;
 
@@ -154,11 +171,11 @@ private:
 
         size_type Iswap = Posnow;
 
-        if (Posleft < size() && Mycont[Posleft] > Mycont[Iswap]) {
+        if (Posleft < size() && Pred(Mycont[Iswap], Mycont[Posleft])) {
             Iswap = Posleft;
         }
 
-        if (Posright < size() && Mycont[Posright] > Mycont[Iswap]) {
+        if (Posright < size() && Pred(Mycont[Iswap], Mycont[Posright])) {
             Iswap = Posright;
         }
 
