@@ -76,13 +76,28 @@ public:
         Sift_up(size() - 1);
     }
 
-    void pop() { // remove root (max priority = max value) from heap
+    value_type pop() { // remove root (max priority = max value) from heap
+        value_type Poped = Mycont.back();
+
         // 1. swap root with last inserted element(the last element in Mycont)
         // 2. remove last element
         // 3. Heapify_down new root
         Swap(0, size() - 1);
         Mycont.pop_back();
         Heapify(0);
+
+        return Poped;
+    }
+
+    value_type remove_at (size_type Pos) {
+        Check_indes(Pos);
+
+        value_type Removed = Mycont[Pos];
+        swap(Pos, size() - 1);
+        Mycont.pop_back();
+        Heapify(Pos);
+
+        return Removed;
     }
 
 private:
@@ -95,7 +110,7 @@ private:
         return ( (i - 1) >> 1 ) * (i > 0);
     }
 
-// [WARNING]: do not check capacity, max_size
+    // [WARNING]: do not check capacity, max_size
     size_type Right_index (size_type i) const { // 0 <= result <= max_size()
         if (i < 0) {
             throw std::invalid_argument("invalid index");
@@ -104,7 +119,7 @@ private:
         return (i << 1) + 2;
     }
 
-// [WARNING]: do not check capacity, max_size
+    // [WARNING]: do not check capacity, max_size
     size_type Left_index (size_type i) const { // 0 <= result <= max_size()
         if (i < 0) {
             throw std::invalid_argument("invalid index");
@@ -116,35 +131,41 @@ private:
         std::swap(Mycont.at(k), Mycont.at(m));
     }
 
-    void Sift_up (size_type Inow) {
-        // size_type Inext = Parent_index(Inow);
-        size_type Inext = (Inow - 1) >> 1;
-        while (Inow > 0 && Mycont[Inow] > Mycont[Inext]) {
-            Swap(Inow, Inext);
-            Inow = Inext; Inext = Parent_index(Inow);
+    void Sift_up (size_type Posnow) {
+        // size_type Inext = Parent_index(Posnow);
+        size_type Inext = (Posnow - 1) >> 1;
+        while (Posnow > 0 && Mycont[Posnow] > Mycont[Inext]) {
+            Swap(Posnow, Inext);
+            Posnow = Inext; Inext = Parent_index(Posnow);
         }
     }
 
-    void Heapify (size_type Inow = 0) {
-        // size_type Iright = Right_index(Inow);
-        size_type Iright = 2*Inow + 1;
+    void Heapify (size_type Posnow = 0) {
+        // size_type Posright = Right_index(Posnow);
+        size_type Posright = 2*Posnow + 1;
 
-        // size_type Ileft = Left_index(Inow);
-        size_type Ileft = 2*Inow + 2;
+        // size_type Posleft = Left_index(Posnow);
+        size_type Posleft = 2*Posnow + 2;
 
-        size_type Iswap = Inow;
+        size_type Iswap = Posnow;
 
-        if (Ileft < size() && Mycont[Ileft] > Mycont[Iswap]) {
-            Iswap = Ileft;
+        if (Posleft < size() && Mycont[Posleft] > Mycont[Iswap]) {
+            Iswap = Posleft;
         }
 
-        if (Iright < size() && Mycont[Iright] > Mycont[Iswap]) {
-            Iswap = Iright;
+        if (Posright < size() && Mycont[Posright] > Mycont[Iswap]) {
+            Iswap = Posright;
         }
 
-        if (Iswap != Inow) {
-            Swap(Iswap, Inow);
+        if (Iswap != Posnow) {
+            Swap(Iswap, Posnow);
             Heapify(Iswap);
+        }
+    }
+
+    void Check_index (size_type Pos) {
+        if (Pos < 0 || Pos >= size()) {
+            throw std::invalid_argument("Invalid Position Index");
         }
     }
 
