@@ -11,8 +11,7 @@
 
 template < class Ty,
            class Cont_t = std::vector<Ty>,
-           class Compr_t = std::less<typename Cont_t::value_type>
-         >
+           class Compr_t = std::less<typename Cont_t::value_type> >
 class heap { // max heap := root contain max key
 public:
     using value_type = typename Cont_t::value_type;
@@ -89,15 +88,21 @@ public:
         return Poped;
     }
 
-    value_type remove_at (size_type Pos) {
-        Check_indes(Pos);
+    bool remove_val (const value_type& Val) {
+        size_type Pos = size();
+        for (size_type i = 0; i < size(); ++i) {
+            if (Mycont[i] == Val) { Pos = i; break; }
+        }
 
-        value_type Removed = Mycont[Pos];
-        swap(Pos, size() - 1);
-        Mycont.pop_back();
-        Heapify(Pos);
+        if ( Pos < size() ) {
+            Swap(Pos, size() - 1);
+            Mycont.pop_back();
+            Heapify(Pos);
 
-        return Removed;
+            return true;
+        }
+
+        return false;
     }
 
 private:
@@ -220,7 +225,6 @@ namespace msl {
         printf("\n");
     }
 }
-
 
 
 #endif // HEAP_HPP
