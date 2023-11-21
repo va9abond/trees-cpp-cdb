@@ -5,6 +5,7 @@
 #include "laptop.hpp"
 #include "myutils.hpp"
 #include "avltree.hpp"
+#include "heap.hpp"
 
 
 // =============================================================================
@@ -372,7 +373,6 @@ inline void task2_3_presentation (int count) {
 // =============================================================================
 // ================================ 2_4_1 ======================================
 // =============================================================================
-
 template <
     class Iter_t = alias::tr_const_iter,
     class Kty
@@ -483,7 +483,7 @@ inline void task2_5presentation() {
     using std::cout;
     using std::right;
     printf("\n##############################\n");
-    std::cout.width(30); cout << right << "@ task 2.4" << "\n";
+    std::cout.width(30); cout << right << "@ task 2.5" << "\n";
     printf("Output tree by iterators\n");
 
     // Use <int, int> not <laptop_key, laptop> to
@@ -504,12 +504,77 @@ inline void task2_5presentation() {
     msl::print_tree_iter(tree[0]);
     msl::print_tree_iter(tree[1]);
 }
-
-
-
-
-
 // =============================================================================
-// ================================ 2_1_3 ======================================
+// ================================ 2_6 ======================================
 // =============================================================================
+inline void task2_6_presentation() {
+    using std::cout;
+    using std::right;
+    printf("\n##############################\n");
+    std::cout.width(30); cout << right << "@ task 2.6" << "\n";
+
+
+    heap<int> myheap;
+
+    myheap.push(13);
+    myheap.push(11);
+    myheap.push(81);
+    myheap.push(99);
+    myheap.emplace(41);
+    myheap.emplace(23);
+    myheap.emplace(83);
+    myheap.emplace(12);
+    myheap.emplace(88);
+    myheap.emplace(101);
+    myheap.emplace(10);
+    myheap.emplace(51);
+    myheap.emplace(42);
+    myheap.emplace(67);
+    myheap.emplace(74);
+    myheap.emplace(24);
+    myheap.emplace(96);
+
+    std::cout << "\n";
+    std::cout.width(30); cout << right << "Constructing heap";
+    msl::print_heap(myheap);
+
+    std::cout << "\n";
+    std::cout.width(30); cout << right << "Pop from the top" << "\n\n";
+
+    std::cout.width(30); cout << right << "Pop 1";
+    myheap.pop();
+    msl::print_heap(myheap);
+
+    std::cout.width(30); cout << right << "Pop 2";
+    myheap.pop();
+    msl::print_heap(myheap);
+
+    std::cout.width(30); cout << right << "Pop 3";
+    myheap.pop();
+    msl::print_heap(myheap);
+
+    std::cout.width(30); cout << right << "Pop 4";
+    myheap.pop();
+    msl::print_heap(myheap);
+
+
+    std::cout << "\n";
+
+    std::cout.width(30); cout << right << "Remove by value" << "\n\n";
+    std::cout.width(30); cout << right << "Remove 83";
+    myheap.remove_val(83);
+    msl::print_heap(myheap);
+
+    std::cout.width(30); cout << right << "Remove 2";
+    myheap.remove_val(2);
+    msl::print_heap(myheap);
+
+    std::cout.width(30); cout << right << "Remove 10";
+    myheap.remove_val(10);
+    msl::print_heap(myheap);
+
+    std::cout.width(30); cout << right << "Remove 13";
+    myheap.remove_val(13);
+    msl::print_heap(myheap);
+}
 #endif // VIEW_HPP

@@ -509,7 +509,8 @@ public:
 
 private:
     bool Is_equivalent (const key_type& Rhs, const key_type& Lhs) const {
-        return !key_compare{}(Rhs, Lhs) && !key_compare{}(Lhs, Rhs);
+        key_compare Pred = key_comp();
+        return !Pred(Rhs, Lhs) && !Pred(Lhs, Rhs);
     }
 
 public:
@@ -979,6 +980,7 @@ public:
         printTree(Myhead->Parent, nullptr, false);
     }
 
+private:
     Nodeptr Myhead; // pointer to head node
                     // Myhead->Parent is root of entire tree
                     // Myhead->Parent->Parent is Myhead
